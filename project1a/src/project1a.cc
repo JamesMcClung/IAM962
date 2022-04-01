@@ -1,6 +1,8 @@
+#include "project1a.hh"
+
 #include <iostream>
 
-#include "fullmatrix.hh"
+#include "linalg/fullmatrix.hh"
 
 int main() {
     std::cout << "Hello, Prof. McHugh\n";
