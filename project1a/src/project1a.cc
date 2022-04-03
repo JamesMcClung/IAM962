@@ -30,7 +30,9 @@ void initialize_coefs_CN() {
     // b(v - u) = v^ - 2v + v_ + u^ - 2u + u_
     // => -v_ + (b+2)v - v^ = u_ + (b-2)u + u^
 
-    // I take dt = dx^2/nu, so b = 2, and C-N becomes:
+    static_assert(dt == dt_opt);  // TODO remove this restriction, maybe
+
+    // I take dt_opt = dx^2/nu, so b = 2, and C-N becomes:
     // => -v_ + 4v - v^ = u_ + u^
     for (int r = 0; r < nx; r++) {
         // off-diagonals are already -1

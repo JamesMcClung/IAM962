@@ -1,35 +1,19 @@
 #pragma once
-
-////////////////////////////////////////////////////////////////////////
-// constants as macros so they can eventually be defined during
-//   compilation
-
-#define NU .01
-#define NX 128;
-#define NT 1024;
-#define MIN_X 0;
-#define MAX_X 1;
-#define MIN_X_BC 0;
-#define MAX_X_BC 0;
-
-#define WRITE_EVERY 8;
-#define OUT_FILE "out.csv";
-
-////////////////////////////////////////////////////////////////////////
-// constants as variables for actual use in the code
+#include "config.hh"
 
 using real = double;  // type for values of u
 
-static const real nu = NU;                // diffusivity constant: u_t = nu * u_xx
-static const int nx = NX;                 // number of spatial gridpoints
-static const int nt = NT;                 // number of temporal gridpoints (time steps to run for)
-static const real min_x = MIN_X;          // lower bound for x domain
-static const real max_x = MAX_X;          // upper bound for x domain
-static const real len_x = max_x - min_x;  // length of x domain
-static const real dx = len_x / nx;        // distance between spatial gridpoints
-static const real dt = dx * dx / nu;      // distance between temporal gridpoints
-static const real min_x_bc = MIN_X_BC;    // boundary condition for u(min_x)
-static const real max_x_bc = MAX_X_BC;    // boundary condition for u(max_x)
+static constexpr real nu = P1A_NU;                          // diffusivity constant: u_t = nu * u_xx
+static constexpr int nx = P1A_NX;                           // number of spatial gridpoints
+static constexpr int nt = P1A_NT;                           // time steps to run for
+static constexpr real min_x = P1A_MIN_X;                    // lower bound for x domain
+static constexpr real max_x = P1A_MAX_X;                    // upper bound for x domain
+static constexpr real len_x = max_x - min_x;                // length of x domain
+static constexpr real dx = len_x / nx;                      // distance between spatial gridpoints
+static constexpr real dt_opt = dx * dx / nu;                // a convenient choice for dt
+static constexpr real dt = P1A_DT == -1 ? dt_opt : P1A_DT;  // time between time steps
+static constexpr real min_x_bc = P1A_MIN_X_BC;              // boundary condition for u(min_x)
+static constexpr real max_x_bc = P1A_MAX_X_BC;              // boundary condition for u(max_x)
 
-static const int write_every = WRITE_EVERY;  // write u every <this many> time steps
-static const auto out_file = OUT_FILE;       // path to output
+static constexpr int write_every = P1A_WRITE_EVERY;  // write u every <this many> time steps
+static constexpr auto out_file = P1A_OUT_FILE;       // path to output
