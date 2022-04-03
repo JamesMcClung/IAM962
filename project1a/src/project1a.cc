@@ -1,5 +1,3 @@
-#include "project1a.hh"
-
 #include <cmath>
 #include <iostream>
 
@@ -7,6 +5,7 @@
 #include "linalg/fullmatrix.hh"
 #include "linalg/matrix_io.hh"
 #include "linalg/thomas.hh"
+#include "params.hh"
 
 using u_type = linalg::FullMatrix<nx, 1, real>;
 static linalg::BandedMatrix<nx, 1, 1, real> coefs_CN(-1);
