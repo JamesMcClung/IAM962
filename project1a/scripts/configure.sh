@@ -1,3 +1,5 @@
 #!/bin/bash
 
-cmake -B ../build -S .. $@
+args=($@)
+args=("${args[@]/#/-DP1A_}")
+cmake -B ../build -S .. ${args[@]}
