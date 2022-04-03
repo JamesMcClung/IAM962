@@ -38,7 +38,7 @@ with open(f"{file}") as tsv:
 line, = ax.plot(x, u[0])
 
 def animate(i):
-    ax.set_title(f"Heat Equation, t={t[i]:.2f}")
+    ax.set_title(f"Heat Equation, $\\nu$={nu}, t={t[i]:.2f}")
     line.set_ydata(u[i])
     return line, ax
 
