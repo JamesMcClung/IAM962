@@ -1,38 +1,43 @@
-# from https://matplotlib.org/stable/gallery/animation/simple_anim.html
-# and https://stackoverflow.com/questions/11059390/parsing-a-tab-separated-file-in-python
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import csv
 import sys
 
+########################################################################
+# Check number of arguments
+
 if len(sys.argv) != 2:
     sys.exit(f"Usage: {sys.argv[0]} path/to/data.csv")
+
+########################################################################
+# Load data to plot
 
 file = sys.argv[1]
 
 with open(file) as tsv:
-    i = 0
     line_iter = csv.reader(tsv, delimiter = " ")
     
     # read parameters
     params = [float(p) for p in next(line_iter)]
     nu, nx, nt, min_x, max_x, dx, dt, min_x_bc, max_x_bc, write_every = params
     nx, nt, write_every = int(nx), int(nt), int(write_every)
-    nt_out = nt // write_every
+    nt_out = 1 + nt // write_every
 
+    # prep variables
     x = np.arange(min_x, max_x, dx)
-
-    u = np.zeros([nt_out, nx])
     t = np.zeros(nt_out)
+    u = np.zeros([nt_out, nx])
 
     # read data
+    i = 0
     for line in line_iter:
         t[i] = i * dt * write_every
         u[i] = np.array(line)
         i += 1
-        if i >= nt_out:
-            break
+
+########################################################################
+# View the time evolution as an animated plot
 
 fig, ax = plt.subplots()
 line, = ax.plot(x, u[0])
