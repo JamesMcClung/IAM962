@@ -6,12 +6,12 @@ import matplotlib.animation as animation
 import csv
 import sys
 
-fig, ax = plt.subplots()
+if len(sys.argv) != 2:
+    sys.exit(f"Usage: {sys.argv[0]} path/to/data.csv")
 
-# .csv file with data, e.g. "out.csv"
 file = sys.argv[1]
 
-with open(f"{file}") as tsv:
+with open(file) as tsv:
     i = 0
     line_iter = csv.reader(tsv, delimiter = " ")
     
@@ -34,7 +34,7 @@ with open(f"{file}") as tsv:
         if i >= nt_out:
             break
 
-        
+fig, ax = plt.subplots()
 line, = ax.plot(x, u[0])
 
 def animate(i):
