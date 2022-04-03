@@ -8,7 +8,7 @@ import sys
 
 fig, ax = plt.subplots()
 
-# see project1a.hh
+# see params.hh
 lenx = 1
 nx = 128
 dx = lenx / nx
@@ -27,7 +27,9 @@ file = sys.argv[1]
 
 with open(f"{file}") as tsv:
     i = 0
-    for line in csv.reader(tsv, delimiter = " "):
+    line_iter = csv.reader(tsv, delimiter = " ")
+    next(line_iter) # skip line containing parameters, for now
+    for line in line_iter:
         t[i] = i * dt * out_every
         u[i] = np.array(line)
         i += 1

@@ -50,11 +50,13 @@ void solve_for_next_u(const u_type &u, u_type &next_u) {
     thomas_in_place(coefs_CN, next_u);
 }
 
-void write_u(const u_type &u) {
-    static bool first_write = true;
+void write_params() {
+    linalg::FullMatrix params_mat({{nu, real(nx), real(nt), min_x, max_x, dx, dt, min_x_bc, max_x_bc, real(write_every)}});
+    saveMatrix(out_file, params_mat, false);
+}
 
-    saveMatrix_transpose(out_file, u, !first_write);
-    first_write = false;
+void write_u(const u_type &u) {
+    saveMatrix_transpose(out_file, u, true);
 }
 
 int main() {
@@ -63,6 +65,8 @@ int main() {
 
     set_to_initial_conditions(*this_u);
     initialize_coefs_CN();
+
+    write_params();
 
     for (int i = 0; i < nt; i++) {
         if (i % write_every == 0) {
