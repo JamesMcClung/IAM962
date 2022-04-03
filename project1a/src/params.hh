@@ -20,7 +20,7 @@
 
 using real = double;
 
-static const double nu = NU;
+static const real nu = NU;
 static const int nx = NX;
 static const int nt = NT;
 static const real min_x = MIN_X;
@@ -32,4 +32,4 @@ static const real min_x_bc = MIN_X_BC;
 static const real max_x_bc = MAX_X_BC;
 
 static const int write_every = WRITE_EVERY;
-auto out_file = OUT_FILE;
+static const auto out_file = OUT_FILE;
