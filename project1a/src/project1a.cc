@@ -30,24 +30,33 @@ void initialize_coefs_CN() {
     // b(v - u) = v^ - 2v + v_ + u^ - 2u + u_
     // => -v_ + (b+2)v - v^ = u_ + (b-2)u + u^
 
-    static_assert(dt == dt_opt);  // TODO remove this restriction, maybe
-
-    // I take dt_opt = dx^2/nu, so b = 2, and C-N becomes:
-    // => -v_ + 4v - v^ = u_ + u^
     for (int r = 0; r < nx; r++) {
         // off-diagonals are already -1
+#ifdef USE_DT_OPT
+        // In this case, dt = dx^2/nu, so b = 2, and C-N becomes:
+        // => -v_ + 4v - v^ = u_ + u^
         coefs_CN(r, r) = 4;
+#else
+        coefs_CN(r, r) = 2 + 2 * dx * dx / (dt * nu);
+#endif
     }
 }
 
 void solve_for_next_u(const u_type &u, u_type &next_u) {
     // see initialize_coefs_CN for derivation of scheme
+#ifdef USE_DT_OPT
     for (int r = 1; r < nx - 1; r++) {
         next_u(r, 0) = u(r - 1, 0) + u(r + 1, 0);
     }
-    // handle boundaries separately:
     next_u(0, 0) = min_x_bc + u(1, 0);
     next_u(nx - 1, 0) = u(nx - 2, 0) + max_x_bc;
+#else
+    for (int r = 1; r < nx - 1; r++) {
+        next_u(r, 0) = u(r - 1, 0) + (2 * dx * dx / (dt * nu) - 2) * u(r, 0) + u(r + 1, 0);
+    }
+    next_u(0, 0) = min_x_bc + (2 * dx * dx / (dt * nu) - 2) * u(0, 0) + u(1, 0);
+    next_u(nx - 1, 0) = u(nx - 2, 0) + (2 * dx * dx / (dt * nu) - 2) * u(nx - 1, 0) + max_x_bc;
+#endif
 
     thomas_in_place(coefs_CN, next_u);
 }

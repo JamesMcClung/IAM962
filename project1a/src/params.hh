@@ -10,8 +10,12 @@ static constexpr real min_x = P1A_MIN_X;                    // lower bound for x
 static constexpr real max_x = P1A_MAX_X;                    // upper bound for x domain
 static constexpr real len_x = max_x - min_x;                // length of x domain
 static constexpr real dx = len_x / nx;                      // distance between spatial gridpoints
-static constexpr real dt_opt = dx * dx / nu;                // a convenient choice for dt
-static constexpr real dt = P1A_DT == -1 ? dt_opt : P1A_DT;  // time between time steps
+#ifdef P1A_DT
+static constexpr real dt = P1A_DT;  // time between time steps
+#else
+#define USE_DT_OPT
+static constexpr real dt = dx * dx / nu;  // a convenient choice for dt
+#endif
 static constexpr real min_x_bc = P1A_MIN_X_BC;              // boundary condition for u(min_x)
 static constexpr real max_x_bc = P1A_MAX_X_BC;              // boundary condition for u(max_x)
 

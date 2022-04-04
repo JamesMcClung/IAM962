@@ -3,8 +3,9 @@
 #define P1A_NT ${P1A_NT}
 #define P1A_MIN_X ${P1A_MIN_X}
 #define P1A_MAX_X ${P1A_MAX_X}
-#define P1A_DT ${P1A_DT}
 #define P1A_MIN_X_BC ${P1A_MIN_X_BC}
 #define P1A_MAX_X_BC ${P1A_MAX_X_BC}
 #define P1A_WRITE_EVERY ${P1A_WRITE_EVERY}
 #define P1A_OUT_FILE "${P1A_OUT_FILE}"
+
+#cmakedefine P1A_DT ${P1A_DT}
