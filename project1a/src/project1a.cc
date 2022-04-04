@@ -7,6 +7,39 @@
 #include "linalg/thomas.hh"
 #include "params.hh"
 
+////////////////////////////////////////////////////////////////////////
+//                            DESCRIPTION                             //
+////////////////////////////////////////////////////////////////////////
+
+// Author: James McClung
+// Month: April 2022
+
+// This program solves the heat equation, u_t = nu * u_xx, using the
+//   Crank-Nicolson (C-N) method with central difference in space.
+
+// Notation:
+//   u^n_j         -> u
+//   u^n_{j-1}     -> u_
+//   u^n_{j+1}     -> u^
+//   u^{n+1}_j     -> v
+//   u^{n+1}_{j-1} -> v_
+//   u^{n+1}_{j+1} -> v^
+//   b := 2 * dx^2 / (dt * nu)
+
+// C-N with central difference in space can then be written as
+//   b(v - u) = v^ - 2v + v_ + u^ - 2u + u_
+//   => -v_ + (b+2)v - v^ = u_ + (b-2)u + u^,
+//   which is a tridiagonal system.
+
+// Note that when dt = dx^2 / nu, we get b=2, and the scheme reduces
+//   further to
+//   => -v_ + 4v - v^ = u_ + u^.
+// This case is handled separately to optimize out the call to u.
+
+////////////////////////////////////////////////////////////////////////
+//                              PROGRAM                               //
+////////////////////////////////////////////////////////////////////////
+
 using u_type = linalg::FullMatrix<nx, 1, real>;
 static linalg::BandedMatrix<nx, 1, 1, real> coefs_CN(-1);
 
@@ -18,23 +51,9 @@ void set_to_initial_conditions(u_type &u) {
 }
 
 void initialize_coefs_CN() {
-    // Notation:
-    // u^n -> u
-    // u^{n+1} -> v
-    // u_j -> u
-    // u_{j-1} -> u_
-    // u_{j+1} -> u^
-    // real b = 2 * dx * dx / (dt * nu);
-
-    // Crank-Nicolson scheme can be written as:
-    // b(v - u) = v^ - 2v + v_ + u^ - 2u + u_
-    // => -v_ + (b+2)v - v^ = u_ + (b-2)u + u^
-
     for (int r = 0; r < nx; r++) {
-        // off-diagonals are already -1
+        // off-diagonals are already -1, so just set main diagonal
 #ifdef USE_DT_OPT
-        // In this case, dt = dx^2/nu, so b = 2, and C-N becomes:
-        // => -v_ + 4v - v^ = u_ + u^
         coefs_CN(r, r) = 4;
 #else
         coefs_CN(r, r) = 2 + 2 * dx * dx / (dt * nu);
@@ -43,7 +62,6 @@ void initialize_coefs_CN() {
 }
 
 void solve_for_next_u(const u_type &u, u_type &next_u) {
-    // see initialize_coefs_CN for derivation of scheme
 #ifdef USE_DT_OPT
     for (int r = 1; r < nx - 1; r++) {
         next_u(r, 0) = u(r - 1, 0) + u(r + 1, 0);
