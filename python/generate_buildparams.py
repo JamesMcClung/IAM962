@@ -14,6 +14,7 @@ path, *defines = sys.argv[1:]
 
 def generate_c_line(define: str):
     name, val = define.split('=')
+    name = name.upper()
     if val:
         return f"#define {name} {val}"
 
