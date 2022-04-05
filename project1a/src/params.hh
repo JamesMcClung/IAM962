@@ -1,4 +1,5 @@
 #pragma once
+#include "buildparams.h"
 #include "config.hh"
 
 using real = double;  // type for values of u

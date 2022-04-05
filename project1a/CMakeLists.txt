@@ -14,3 +14,8 @@ set(P1A_OUT_FILE "out.csv" CACHE STRING "output file")
 
 configure_file(src/config.txt src/config.hh)
 target_include_directories(project1a PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src)
+
+set(BUILDPARAMS_FILE ${CMAKE_CURRENT_BINARY_DIR}/src/buildparams.h)
+
+add_custom_target(buildparams COMMAND python3 ${PROJECT_SOURCE_DIR}/python/generate_buildparams.py ${BUILDPARAMS_FILE} \${BUILDPARAMS})
+add_dependencies(project1a buildparams)
