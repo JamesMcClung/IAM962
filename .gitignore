@@ -1,5 +1,6 @@
 build/
 .vscode/*
+__pycache__/
 
 !.vscode/settings.json
 
