@@ -1,23 +1,26 @@
 import sys
-# import os.path
 import os
 
 ########################################################################
+# Ensure correct number of args
 
 if len(sys.argv) < 2:
     sys.exit(f"Usage: {sys.argv[0]} path/to/buildparams.h NX=128 DT= ...")
 
 ########################################################################
+# Parse path to file and defines to define
 
 path, *defines = sys.argv[1:]
 
 ########################################################################
+# Make any missing directories in path
 
 dir = os.path.dirname(path)
 if not os.path.exists(dir):
     os.mkdir(dir)
 
 ########################################################################
+# Replace old file contents with new file contents
 
 # Generate new build params from args
 
