@@ -15,7 +15,39 @@
 // Month: April 2022
 
 // This program solves the wave equation, u_t + c * u_x = 0, using an
-//   Adams-Bashforth method in time and central difference in space.
+//   Adams-Bashforth (AB) method in time and central difference in space.
+
+// AB methods solve u_t = F(u) explicitly. For the wave equation,
+//   F(u) = -c * d/dx[u]. We replace the d/dx operator by the
+//   central difference operator, Dx[u_j] = (u_{j+1} - u_{j-1}) / (2dx).
+
+// Notation:
+//   u^{n-k}_j     -> uk      (k = 0, 1, ...)
+//   u^{n-k}_{j-1} -> uk_     (k = 0, 1, ...)
+//   u^{n-k}_{j+1} -> uk^     (k = 0, 1, ...)
+//   u^{n+1}_j     -> v
+//   b := dt * c / (2dx)
+//   duk := -b * (uk^ - uk_)  (k = 0, 1, ...)
+
+// Central difference in space:
+//   => F(uk) = -c / (2dx) * (uk^ - uk_)
+//            = duk / dt
+
+// AB1 with central difference in space can then be written as
+//   v = u0 + dt * F(u0)
+//     = u0 + du0
+
+// AB2 with central difference in space as
+//   v = u0 + dt/2 * (3F(u0) - F(u1))
+//     = u0 + 1/2 * (3du0 - du1)
+
+// AB3 with central difference in space as
+//   v = u0 + dt/12 * (23F(u0) - 16F(u1) + 5F(u2))
+//     = u0 + 1/12 * (23du0 - 16du1 + 5du2)
+
+// AB4 with central difference in space as
+//   v = u0 + dt/24 * (55F(u0) - 59F(u1) + 37F(u2) - 9F(u3))
+//     = u0 + 1/24 * (55du0 - 59du1 + 37du2 - 9du3)
 
 ////////////////////////////////////////////////////////////////////////
 //                              PROGRAM                               //
