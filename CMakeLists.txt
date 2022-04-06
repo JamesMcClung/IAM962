@@ -14,3 +14,4 @@ add_subdirectory(external/linalg)
 # Add projects
 
 add_subdirectory(project1a)
+add_subdirectory(project1b)
