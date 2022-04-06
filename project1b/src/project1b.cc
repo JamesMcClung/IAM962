@@ -54,7 +54,6 @@
 ////////////////////////////////////////////////////////////////////////
 
 using u_type = linalg::FullMatrix<nx, 1, real>;
-static linalg::BandedMatrix<nx, 1, 1, real> coefs_CN(-1);
 
 void set_to_initial_conditions(u_type &u) {
     for (int i = 0; i < nx; i++) {
