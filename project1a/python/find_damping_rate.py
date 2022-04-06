@@ -1,7 +1,8 @@
 import numpy as np
-import csv
 import sys
+
 from scipy import optimize
+from util import reader
 
 ########################################################################
 # Check number of arguments
@@ -12,28 +13,9 @@ if len(sys.argv) != 2:
 ########################################################################
 # Load data to plot
 
-file = sys.argv[1]
+path = sys.argv[1]
 
-with open(file) as tsv:
-    line_iter = csv.reader(tsv, delimiter = " ")
-    
-    # read parameters
-    params = [float(p) for p in next(line_iter)]
-    nu, nx, nt, min_x, max_x, dx, dt, min_x_bc, max_x_bc, write_every = params
-    nx, nt, write_every = int(nx), int(nt), int(write_every)
-    nt_out = 1 + nt // write_every
-
-    # prep variables
-    x = np.arange(min_x, max_x, dx)
-    t = np.zeros(nt_out)
-    u = np.zeros([nt_out, nx])
-
-    # read data
-    i = 0
-    for line in line_iter:
-        t[i] = i * dt * write_every
-        u[i] = np.array(line)
-        i += 1
+u, x, t, nu = reader.read_uxtv(path)
 
 ########################################################################
 # Determine the damping rate, sigma
