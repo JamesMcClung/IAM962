@@ -12,6 +12,7 @@ static constexpr real min_x = MIN_X;          // lower bound for x domain
 static constexpr real max_x = MAX_X;          // upper bound for x domain
 static constexpr real len_x = max_x - min_x;  // length of x domain
 static constexpr real dx = len_x / nx;        // distance between spatial gridpoints
+static constexpr real cfl = CFL;              // Courant number, must be <= 1 for stability
 static constexpr real dt = DT;                // time between time steps
 
 static constexpr int write_every = WRITE_EVERY;  // write u every <this many> time steps

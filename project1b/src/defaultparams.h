@@ -20,9 +20,12 @@
 #define MAX_X 1
 #endif
 
+#ifndef CFL
+#define CFL 0.1
+#endif
+
 #ifndef DT
-#define USE_DT_OPT
-#define DT (dx / c)
+#define DT (cfl * dx / c)
 #endif
 
 #ifndef WRITE_EVERY
