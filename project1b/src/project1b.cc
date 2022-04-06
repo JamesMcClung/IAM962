@@ -6,6 +6,7 @@
 #include "linalg/matrix_io.hh"
 #include "linalg/thomas.hh"
 #include "params.hh"
+#include "util.hh"
 
 ////////////////////////////////////////////////////////////////////////
 //                            DESCRIPTION                             //
@@ -54,6 +55,8 @@
 ////////////////////////////////////////////////////////////////////////
 
 using u_type = linalg::FullMatrix<nx, 1, real>;
+using dus_type = CyclicList<u_type, which_AB>;
+static constexpr real b = dt * c / (2 * dx);
 
 void set_to_initial_conditions(u_type &u) {
     for (int i = 0; i < nx; i++) {
@@ -62,8 +65,26 @@ void set_to_initial_conditions(u_type &u) {
     }
 }
 
-void solve_for_next_u(const u_type &u, u_type &next_u) {
-    // TODO
+void solve_for_du(const u_type &u, u_type &du) {
+    for (int i = 1; i < nx - 1; i++) {
+        du(i, 0) = -b * (u(i + 1, 0) - u(i - 1, 0));
+    }
+    // periodic BCs
+    du(0, 0) = -b * (u(1, 0) - u(nx - 1, 0));
+    du(nx - 1, 0) = -b * (u(0, 0) - u(nx - 2, 0));
+}
+
+void set_initial_dus(dus_type &dus, const u_type &u_initial) {
+    for (int i = 0; i < which_AB; i++) {
+        dus.set_ptr(i, new u_type());
+        solve_for_du(u_initial, dus[i]);
+    }
+}
+
+void solve_for_next_u(const u_type &u0, const dus_type &dus, u_type &next_u) {
+    if (which_AB == 4) {
+        next_u = u0 + (real(55) * dus[0] - real(59) * dus[1] + real(37) * dus[2] - real(9) * dus[3]) / real(24);
+    }
 }
 
 void write_params() {
@@ -76,10 +97,17 @@ void write_u(const u_type &u) {
 }
 
 int main() {
+    // Step 0: Initialization
+    //  - set u0 to sin(2pi * dx / len_x * j)
+    //  - set du0, du1, ... to -b * (u0^ - u0_)
+
     std::unique_ptr<u_type> this_u(new u_type);
     std::unique_ptr<u_type> next_u(new u_type);
 
     set_to_initial_conditions(*this_u);
+
+    dus_type dus;
+    set_initial_dus(dus, *this_u);
 
     write_params();
 
@@ -88,8 +116,19 @@ int main() {
             write_u(*this_u);
         }
 
-        solve_for_next_u(*this_u, *next_u);
+        // Step 1: Solve for v
+        //  - set v according to which AB method is in use
+
+        solve_for_next_u(*this_u, dus, *next_u);
+
+        // Step 2: Cycle resources
+        //  - swap u0 and v
+        //  - relabel duk -> du{k+1} cyclicly
+        //  - set du0 to -b * (u0^ - u0_)
+
         this_u.swap(next_u);
+        dus.rotate(1);
+        solve_for_du(*this_u, dus[0]);
     }
 
     write_u(*this_u);
