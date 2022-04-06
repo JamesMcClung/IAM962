@@ -16,3 +16,5 @@ static constexpr real dt = DT;                // time between time steps
 
 static constexpr int write_every = WRITE_EVERY;  // write u every <this many> time steps
 static constexpr auto out_file = OUT_FILE;       // path to output
+
+static constexpr int which_AB = WHICH_AB;  // which Adams-Bashforth method to use (1, 2, 3, or 4)

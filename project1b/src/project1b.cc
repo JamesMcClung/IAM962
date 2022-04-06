@@ -67,7 +67,7 @@ void solve_for_next_u(const u_type &u, u_type &next_u) {
 }
 
 void write_params() {
-    linalg::FullMatrix params_mat({{c, real(nx), real(nt), min_x, max_x, dx, dt, real(write_every)}});
+    linalg::FullMatrix params_mat({{c, real(nx), real(nt), min_x, max_x, dx, dt, real(write_every), real(which_AB)}});
     saveMatrix(out_file, params_mat, false);
 }
 

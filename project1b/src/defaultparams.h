@@ -32,3 +32,7 @@
 #ifndef OUT_FILE
 #define OUT_FILE "out.csv"
 #endif
+
+#ifndef WHICH_AB
+#define WHICH_AB 4
+#endif
