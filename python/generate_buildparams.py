@@ -12,6 +12,9 @@ if len(sys.argv) < 2:
 
 path, *defines = sys.argv[1:]
 
+# alphabetize so permuting defines doesn't trigger a rebuild
+defines.sort()
+
 ########################################################################
 # Make any missing directories in path
 
@@ -30,7 +33,7 @@ def generate_c_line(define: str):
     if val:
         return f"#define {name} {val}"
 
-new_buildparams = "#pragma once\n" + "\n".join(line for line in [generate_c_line(define) for define in defines] if line)
+new_buildparams = "#pragma once\n" + "\n".join(filter(None, map(generate_c_line, defines)))
 
 # Read old build params
 
