@@ -133,7 +133,7 @@ int main() {
         //  - set du0 to -b * (u0^ - u0_)
 
         this_u.swap(next_u);
-        dus.rotate(1);
+        dus.rotate(-1);
         solve_for_du(*this_u, dus[0]);
     }
 
