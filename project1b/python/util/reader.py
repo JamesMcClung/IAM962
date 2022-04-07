@@ -1,15 +1,20 @@
 import csv
 import numpy as np
 
+def _parse_float_or_int(s: str):
+    p = float(s)
+    if p == int(p):
+        p = int(p)
+    return p
+
 def read_uxtcw(path: str):
     '''Parse u, x, t, and nu from the specified output file.'''
     with open(path) as file:
         line_iter = csv.reader(file, delimiter = " ")
         
         # read parameters
-        params = [float(p) for p in next(line_iter)]
+        params = [_parse_float_or_int(p) for p in next(line_iter)]
         c, nx, nt, min_x, max_x, dx, dt, write_every, which_AB = params
-        nx, nt, write_every, which_AB = int(nx), int(nt), int(write_every), int(which_AB)
         nt_out = 1 + nt // write_every
 
         # prep variables
