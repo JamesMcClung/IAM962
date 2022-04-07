@@ -15,7 +15,7 @@ if len(sys.argv) != 2:
 
 path = sys.argv[1]
 
-u, x, t, c, which_AB = reader.read_uxtcw(path)
+u, x, t, c, which_AB, cfl = reader.read_uxtcwC(path)
 
 ########################################################################
 # View the time evolution as an animated plot
@@ -24,7 +24,7 @@ fig, ax = plt.subplots()
 line, = ax.plot(x, u[0])
 
 def animate(i):
-    ax.set_title(f"Wave Equation, AB{which_AB}: $c={c}$, $t={t[i]:.2f}$")
+    ax.set_title(f"Wave Equation, AB{which_AB}, cfl={cfl}: $t={t[i]:.2f}$")
     line.set_ydata(u[i])
     return line, ax
 

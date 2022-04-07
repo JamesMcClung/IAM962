@@ -7,14 +7,14 @@ def _parse_float_or_int(s: str):
         p = int(p)
     return p
 
-def read_uxtcw(path: str):
+def read_uxtcwC(path: str):
     '''Parse u, x, t, and nu from the specified output file.'''
     with open(path) as file:
         line_iter = csv.reader(file, delimiter = " ")
         
         # read parameters
         params = [_parse_float_or_int(p) for p in next(line_iter)]
-        c, nx, nt, min_x, max_x, dx, dt, write_every, which_AB = params
+        c, nx, nt, min_x, max_x, dx, dt, write_every, which_AB, cfl = params
         nt_out = 1 + nt // write_every
 
         # prep variables
@@ -29,4 +29,4 @@ def read_uxtcw(path: str):
             u[i] = np.array(line)
             i += 1
 
-    return u, x, t, c, which_AB
+    return u, x, t, c, which_AB, cfl
