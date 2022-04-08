@@ -7,26 +7,30 @@ def _parse_float_or_int(s: str):
         p = int(p)
     return p
 
+class Params:
+    def __init__(self, params_as_strs):
+        params = [_parse_float_or_int(p) for p in params_as_strs]
+        self.nx, self.nt, self.min_x, self.max_x, self.dx, self.dt, self.write_every, self.which_AB, self.cfl = params
+        self.nt_out = 1 + self.nt // self.write_every
+
 def read_uxtwC(path: str):
     '''Parse u, x, t, and nu from the specified output file.'''
     with open(path) as file:
         line_iter = csv.reader(file, delimiter = " ")
         
         # read parameters
-        params = [_parse_float_or_int(p) for p in next(line_iter)]
-        nx, nt, min_x, max_x, dx, dt, write_every, which_AB, cfl = params
-        nt_out = 1 + nt // write_every
+        params = Params(next(line_iter))
 
         # prep variables
-        x = np.arange(min_x, max_x, dx)
-        t = np.zeros(nt_out)
-        u = np.zeros([nt_out, nx])
+        x = np.arange(params.min_x, params.max_x, params.dx)
+        t = np.zeros(params.nt_out)
+        u = np.zeros([params.nt_out, params.nx])
 
         # read data
         i = 0
         for line in line_iter:
-            t[i] = i * dt * write_every
+            t[i] = i * params.dt * params.write_every
             u[i] = np.array(line)
             i += 1
 
-    return u, x, t, which_AB, cfl
+    return u, x, t, params.which_AB, params.cfl
