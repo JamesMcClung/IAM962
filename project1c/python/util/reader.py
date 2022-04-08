@@ -8,9 +8,12 @@ def _parse_float_or_int(s: str):
     return p
 
 class Params:
-    def __init__(self, params_as_strs):
-        params = [_parse_float_or_int(p) for p in params_as_strs]
-        self.nx, self.nt, self.min_x, self.max_x, self.dx, self.dt, self.write_every, self.which_AB, self.cfl = params
+    def __init__(self, *param_names):
+        self._param_names = param_names
+    
+    def parse(self, params_as_strs):
+        for name, val in zip(self._param_names, params_as_strs):
+            self.__dict__[name] = _parse_float_or_int(val)
         self.nt_out = 1 + self.nt // self.write_every
 
 def read_uxtp(path: str):
@@ -19,7 +22,8 @@ def read_uxtp(path: str):
         line_iter = csv.reader(file, delimiter = " ")
         
         # read parameters
-        params = Params(next(line_iter))
+        params = Params("nx", "nt", "min_x", "max_x", "dx", "dt", "write_every", "which_AB", "cfl")
+        params.parse(next(line_iter))
 
         # prep variables
         x = np.arange(params.min_x, params.max_x, params.dx)
