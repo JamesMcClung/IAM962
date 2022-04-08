@@ -13,7 +13,7 @@ class Params:
         self.nx, self.nt, self.min_x, self.max_x, self.dx, self.dt, self.write_every, self.which_AB, self.cfl = params
         self.nt_out = 1 + self.nt // self.write_every
 
-def read_uxtwC(path: str):
+def read_uxtp(path: str):
     '''Parse u, x, t, and nu from the specified output file.'''
     with open(path) as file:
         line_iter = csv.reader(file, delimiter = " ")
@@ -33,4 +33,4 @@ def read_uxtwC(path: str):
             u[i] = np.array(line)
             i += 1
 
-    return u, x, t, params.which_AB, params.cfl
+    return u, x, t, params

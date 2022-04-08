@@ -15,7 +15,7 @@ if len(sys.argv) != 2:
 
 path = sys.argv[1]
 
-u, x, t, which_AB, cfl = reader.read_uxtwC(path)
+u, x, t, params = reader.read_uxtp(path)
 
 ########################################################################
 # View the time evolution as an animated plot
@@ -24,7 +24,7 @@ fig, ax = plt.subplots()
 line, = ax.plot(x, u[0])
 
 def animate(i):
-    ax.set_title(f"Burger's Equation, AB{which_AB}, cfl={cfl}: $t={t[i]:.2f}$")
+    ax.set_title(f"Burger's Equation, AB{params.which_AB}, cfl={params.cfl}: $t={t[i]:.2f}$")
     line.set_ydata(u[i])
     return line, ax
 

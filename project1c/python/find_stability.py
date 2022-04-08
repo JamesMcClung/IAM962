@@ -16,7 +16,7 @@ if len(sys.argv) != 2:
 
 path = sys.argv[1]
 
-u, x, t, which_AB, cfl = reader.read_uxtwC(path)
+u, x, t, params = reader.read_uxtp(path)
 
 ########################################################################
 # Calculate amplitude of wave for each time
@@ -59,7 +59,7 @@ else:
 fig, ax = plt.subplots()
 ax.plot(t[:damp_end_idx], amplitudes[:damp_end_idx])
 
-ax.set_title(f"Burger's Equation, AB{which_AB}, cfl={cfl:.3}")
+ax.set_title(f"Burger's Equation, AB{params.which_AB}, cfl={params.cfl:.3}")
 ax.set_xlabel("$t$")
 ax.set_ylabel("Amplitude")
 
