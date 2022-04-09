@@ -8,7 +8,7 @@ def read_uxtv(path: str):
         
         # read parameters
         params = [float(p) for p in next(line_iter)]
-        nu, nx, nt, min_x, max_x, dx, dt, min_x_bc, max_x_bc, write_every = params
+        nu, nx, nt, min_x, max_x, dx, dt, min_x_bc, max_x_bc, write_every, cfl = params
         nx, nt, write_every = int(nx), int(nt), int(write_every)
         nt_out = 1 + nt // write_every
 

@@ -80,7 +80,7 @@ void solve_for_next_u(const u_type &u, u_type &next_u) {
 }
 
 void write_params() {
-    linalg::FullMatrix params_mat({{nu, real(nx), real(nt), min_x, max_x, dx, dt, min_x_bc, max_x_bc, real(write_every)}});
+    linalg::FullMatrix params_mat({{nu, real(nx), real(nt), min_x, max_x, dx, dt, min_x_bc, max_x_bc, real(write_every), cfl}});
     saveMatrix(out_file, params_mat, false);
 }
 
