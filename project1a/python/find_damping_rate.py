@@ -35,5 +35,9 @@ for j in range(len(x)):
     [_, sigma_experimental], _ = optimize.curve_fit(lambda t, u0, sigma: u0 * np.exp(-sigma * t),  t,  u[:, j], p0=[x[j], sigma_theoretical])
     sigma_experimentals.append(sigma_experimental)
 
-print(sigma_theoretical)
-print(np.median(sigma_experimentals))
+median_sigma_experimental = np.median(sigma_experimentals) # mean is more affected by outliers
+relative_error = abs((sigma_theoretical - median_sigma_experimental) / median_sigma_experimental)
+
+print(f"-- theoretical damping rate = {sigma_theoretical}")
+print(f"-- median exp. damping rate = {median_sigma_experimental}")
+print(f"-- relative error = {relative_error}")
