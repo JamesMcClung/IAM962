@@ -29,7 +29,7 @@ if len(args) != 1:
 ########################################################################
 # Load data to plot
 
-path = sys.argv[1]
+path = args[0]
 
 u, x, t, nu = reader.read_uxtv(path)
 
@@ -52,7 +52,7 @@ for j in range(len(x)):
     sigma_experimentals.append(sigma_experimental)
 
 median_sigma_experimental = np.median(sigma_experimentals) # mean is more affected by outliers
-relative_error = abs((sigma_theoretical - median_sigma_experimental) / median_sigma_experimental)
+relative_error = (sigma_theoretical - median_sigma_experimental) / median_sigma_experimental
 
 ########################################################################
 # Print results
