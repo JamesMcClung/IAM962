@@ -26,7 +26,10 @@
 
 #ifndef DT
 #define USE_DT_OPT
-#define DT (cfl * dx * dx / nu)
+#define DT (CFL * dx * dx / nu)
+#else
+#undef CFL
+#define CFL (DT * nu / (dx * dx))
 #endif
 
 #ifndef MIN_X_BC
