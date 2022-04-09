@@ -5,9 +5,25 @@ from scipy import optimize
 from util import reader
 
 ########################################################################
+# Constants for flags/mods
+
+BARE_OUTPUT_FLAG = "--bare"
+
+BARE_OUTPUT_MODE  = "bare"  # only print relative error
+FANCY_OUTPUT_MODE = "fancy" # print more info, with descriptions
+
+mode = FANCY_OUTPUT_MODE
+
+########################################################################
 # Check number of arguments
 
-if len(sys.argv) != 2:
+args = sys.argv[1:]
+
+if BARE_OUTPUT_FLAG in args:
+    mode = BARE_OUTPUT_MODE
+    args.remove(BARE_OUTPUT_FLAG)
+
+if len(args) != 1:
     sys.exit(f"Usage: {sys.argv[0]} path/to/data.csv")
 
 ########################################################################
@@ -38,6 +54,12 @@ for j in range(len(x)):
 median_sigma_experimental = np.median(sigma_experimentals) # mean is more affected by outliers
 relative_error = abs((sigma_theoretical - median_sigma_experimental) / median_sigma_experimental)
 
-print(f"-- theoretical damping rate = {sigma_theoretical}")
-print(f"-- median exp. damping rate = {median_sigma_experimental}")
-print(f"-- relative error = {relative_error}")
+########################################################################
+# Print results
+
+if mode == FANCY_OUTPUT_MODE:
+    print(f"-- theoretical damping rate = {sigma_theoretical}")
+    print(f"-- median exp. damping rate = {median_sigma_experimental}")
+    print(f"-- relative error = {relative_error}")
+elif mode == BARE_OUTPUT_MODE:
+    print(relative_error)
