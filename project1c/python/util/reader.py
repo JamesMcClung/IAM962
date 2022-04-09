@@ -17,7 +17,7 @@ class Params:
         self.nt_out = 1 + self.nt // self.write_every
 
 def read_uxtp(path: str):
-    '''Parse u, x, t, and nu from the specified output file.'''
+    '''Parse u, x, t, and params from the specified output file.'''
     with open(path) as file:
         line_iter = csv.reader(file, delimiter = " ")
         
