@@ -20,9 +20,13 @@
 #define MAX_X 1
 #endif
 
+#ifndef CFL
+#define CFL 1
+#endif
+
 #ifndef DT
 #define USE_DT_OPT
-#define DT (dx * dx / nu)
+#define DT (cfl * dx * dx / nu)
 #endif
 
 #ifndef MIN_X_BC
