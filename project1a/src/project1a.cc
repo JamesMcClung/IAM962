@@ -53,28 +53,28 @@ void set_to_initial_conditions(u_type &u) {
 void initialize_coefs_CN() {
     for (int r = 0; r < nx; r++) {
         // off-diagonals are already -1, so just set main diagonal
-#ifdef USE_DT_OPT
-        coefs_CN(r, r) = 4;
-#else
-        coefs_CN(r, r) = 2 + 2 * dx * dx / (dt * nu);
-#endif
+        if constexpr (cfl == 1) {
+            coefs_CN(r, r) = 4;
+        } else {
+            coefs_CN(r, r) = 2 + 2 * dx * dx / (dt * nu);
+        }
     }
 }
 
 void solve_for_next_u(const u_type &u, u_type &next_u) {
-#ifdef USE_DT_OPT
-    for (int r = 1; r < nx - 1; r++) {
-        next_u(r, 0) = u(r - 1, 0) + u(r + 1, 0);
+    if constexpr (cfl == 1) {
+        for (int r = 1; r < nx - 1; r++) {
+            next_u(r, 0) = u(r - 1, 0) + u(r + 1, 0);
+        }
+        next_u(0, 0) = min_x_bc + u(1, 0);
+        next_u(nx - 1, 0) = u(nx - 2, 0) + max_x_bc;
+    } else {
+        for (int r = 1; r < nx - 1; r++) {
+            next_u(r, 0) = u(r - 1, 0) + (2 * dx * dx / (dt * nu) - 2) * u(r, 0) + u(r + 1, 0);
+        }
+        next_u(0, 0) = min_x_bc + (2 * dx * dx / (dt * nu) - 2) * u(0, 0) + u(1, 0);
+        next_u(nx - 1, 0) = u(nx - 2, 0) + (2 * dx * dx / (dt * nu) - 2) * u(nx - 1, 0) + max_x_bc;
     }
-    next_u(0, 0) = min_x_bc + u(1, 0);
-    next_u(nx - 1, 0) = u(nx - 2, 0) + max_x_bc;
-#else
-    for (int r = 1; r < nx - 1; r++) {
-        next_u(r, 0) = u(r - 1, 0) + (2 * dx * dx / (dt * nu) - 2) * u(r, 0) + u(r + 1, 0);
-    }
-    next_u(0, 0) = min_x_bc + (2 * dx * dx / (dt * nu) - 2) * u(0, 0) + u(1, 0);
-    next_u(nx - 1, 0) = u(nx - 2, 0) + (2 * dx * dx / (dt * nu) - 2) * u(nx - 1, 0) + max_x_bc;
-#endif
 
     thomas_in_place(coefs_CN, next_u);
 }

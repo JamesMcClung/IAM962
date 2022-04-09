@@ -25,7 +25,6 @@
 #endif
 
 #ifndef DT
-#define USE_DT_OPT
 #define DT (CFL * dx * dx / nu)
 #else
 #undef CFL
