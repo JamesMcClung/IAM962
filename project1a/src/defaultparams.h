@@ -17,7 +17,7 @@
 #endif
 
 #ifndef MAX_X
-#define MAX_X 0
+#define MAX_X 1
 #endif
 
 #ifndef DT
