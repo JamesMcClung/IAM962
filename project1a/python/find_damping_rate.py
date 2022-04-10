@@ -46,9 +46,11 @@ sigma_theoretical = 16 * np.pi ** 2 * nu
 # to find sigma experimentally, fit it to
 #   u = u0 * exp(-sigma * t)
 
+equilibrium_idx = np.argmax(np.max(np.abs(u), axis=1) < .01) or len(t)
+
 sigma_experimentals = []
 for j in range(len(x)):
-    [_, sigma_experimental], _ = optimize.curve_fit(lambda t, u0, sigma: u0 * np.exp(-sigma * t),  t,  u[:, j], p0=[x[j], sigma_theoretical])
+    [sigma_experimental], _ = optimize.curve_fit(lambda t, sigma: u[0, j] * np.exp(-sigma * t),  t[:equilibrium_idx],  u[:equilibrium_idx, j], p0=[sigma_theoretical])
     sigma_experimentals.append(sigma_experimental)
 
 median_sigma_experimental = np.median(sigma_experimentals) # mean is more affected by outliers
@@ -58,6 +60,11 @@ relative_error = (sigma_theoretical - median_sigma_experimental) / median_sigma_
 # Print results
 
 if mode == FANCY_OUTPUT_MODE:
+    if equilibrium_idx < len(t):
+        print(f"-- reaches equilibrium at t = {t[equilibrium_idx]}")
+        print(f"---- (ran until t = {t[-1]})")
+    else:
+        print("-- did not reach equilibrium")
     print(f"-- theoretical damping rate = {sigma_theoretical}")
     print(f"-- median exp. damping rate = {median_sigma_experimental}")
     print(f"-- relative error = {relative_error}")
