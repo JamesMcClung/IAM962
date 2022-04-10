@@ -16,10 +16,18 @@ if len(sys.argv) != 2:
 
 path = sys.argv[1]
 
-data = pandas.read_csv(path, sep=' ', header=0)
+data = pandas.read_csv(path, sep=" ", header=0)
 
 ########################################################################
-# Plot the relative error vs cfl
+# Plot the relative error
 
-seaborn.relplot(data=data, x='cfl', y='error')#, hue='nu', style='nu', palette=['r', 'g', 'b'], markers=['D', 'd', 'P'])
+seaborn.relplot(
+    data=data,
+    x="dt",
+    y="error",
+    hue="nu",
+    style="nu",
+    palette=["r", "g", "b"],
+    markers=["D", "d", "P"],
+)
 plt.show()

@@ -1,11 +1,12 @@
 import csv
 import numpy as np
 
+
 def read_uxtv(path: str):
-    '''Parse u, x, t, and nu from the specified output file.'''
+    """Parse u, x, t, and nu from the specified output file."""
     with open(path) as file:
-        line_iter = csv.reader(file, delimiter = " ")
-        
+        line_iter = csv.reader(file, delimiter=" ")
+
         # read parameters
         params = [float(p) for p in next(line_iter)]
         nu, nx, nt, min_x, max_x, dx, dt, min_x_bc, max_x_bc, write_every, cfl = params

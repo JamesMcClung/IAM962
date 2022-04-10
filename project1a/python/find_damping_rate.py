@@ -9,8 +9,8 @@ from util import reader
 
 BARE_OUTPUT_FLAG = "--bare"
 
-BARE_OUTPUT_MODE  = "bare"  # only print relative error
-FANCY_OUTPUT_MODE = "fancy" # print more info, with descriptions
+BARE_OUTPUT_MODE = "bare"  # only print relative error
+FANCY_OUTPUT_MODE = "fancy"  # print more info, with descriptions
 
 mode = FANCY_OUTPUT_MODE
 
@@ -41,19 +41,24 @@ u, x, t, nu = reader.read_uxtv(path)
 #   is u = sin(4πx)exp(-(4π)^2 * nu * t)
 # => theoretical damping rate is sigma = 16π^2 * nu
 
-sigma_theoretical = 16 * np.pi ** 2 * nu
+sigma_theoretical = 16 * np.pi**2 * nu
 
 # to find sigma experimentally, fit it to
 #   u = u0 * exp(-sigma * t)
 
-equilibrium_idx = np.argmax(np.max(np.abs(u), axis=1) < .01) or len(t)
+equilibrium_idx = np.argmax(np.max(np.abs(u), axis=1) < 0.01) or len(t)
 
 sigma_experimentals = []
 for j in range(len(x)):
-    [sigma_experimental], _ = optimize.curve_fit(lambda t, sigma: u[0, j] * np.exp(-sigma * t),  t[:equilibrium_idx],  u[:equilibrium_idx, j], p0=[sigma_theoretical])
+    [sigma_experimental], _ = optimize.curve_fit(
+        lambda t, sigma: u[0, j] * np.exp(-sigma * t),
+        t[:equilibrium_idx],
+        u[:equilibrium_idx, j],
+        p0=[sigma_theoretical],
+    )
     sigma_experimentals.append(sigma_experimental)
 
-median_sigma_experimental = np.median(sigma_experimentals) # mean is more affected by outliers
+median_sigma_experimental = np.median(sigma_experimentals)  # mean is more affected by outliers
 relative_error = (sigma_theoretical - median_sigma_experimental) / median_sigma_experimental
 
 ########################################################################
