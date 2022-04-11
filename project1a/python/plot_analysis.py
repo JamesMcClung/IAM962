@@ -23,11 +23,11 @@ data = pandas.read_csv(path, sep=" ", header=0)
 
 seaborn.relplot(
     data=data,
-    x="dt",
+    x="cfl",
     y="error",
-    hue="nu",
-    style="nu",
-    palette=["r", "g", "b"],
-    markers=["D", "d", "P"],
+    # hue="nu",
+    # style="nu",
+    # palette=["r", "g", "b"],
+    # markers=["D", "S", "P"],
 )
 plt.show()
