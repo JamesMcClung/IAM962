@@ -5,15 +5,31 @@ import matplotlib.animation as animation
 from util import reader
 
 ########################################################################
+# Constants for flags/mods
+
+SAVE_PLOT_FLAG = "--save"
+
+SAVE_PLOT_MODE = "save"  # save plot as gif
+VIEW_PLOT_MODE = "view"  # view plot, but don't save
+
+mode = VIEW_PLOT_MODE
+
+########################################################################
 # Check number of arguments
 
-if len(sys.argv) != 2:
+args = sys.argv[1:]
+
+if SAVE_PLOT_FLAG in args:
+    mode = SAVE_PLOT_MODE
+    args.remove(SAVE_PLOT_FLAG)
+
+if len(args) != 1:
     sys.exit(f"Usage: {sys.argv[0]} path/to/data.csv")
 
 ########################################################################
 # Load data to plot
 
-path = sys.argv[1]
+path = args[0]
 
 u, x, t, nu = reader.read_uxtv(path)
 
@@ -37,4 +53,10 @@ ani = animation.FuncAnimation(
 ax.set_xlabel("$x$")
 ax.set_ylabel("$u$")
 
-plt.show()
+if mode == VIEW_PLOT_MODE:
+    plt.show()
+else:
+    writergif = animation.PillowWriter(fps=30)
+    out_name = "out.gif"
+    ani.save(out_name, writer=writergif)
+    print(f"Saved to {out_name}")
