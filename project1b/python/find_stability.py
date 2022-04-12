@@ -85,7 +85,7 @@ elif mode == BARE_OUTPUT_MODE:
 fig, ax = plt.subplots()
 ax.plot(t[:damp_end_idx], amplitudes[:damp_end_idx])
 
-ax.set_title(f"Wave Equation, AB{which_AB}, cfl={cfl:.3}")
+ax.set_title(f"Wave Equation, AB{which_AB}, cfl={float(cfl):.3}")
 ax.set_xlabel("$t$")
 ax.set_ylabel("Amplitude")
 
