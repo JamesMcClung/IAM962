@@ -48,6 +48,16 @@ explode_idx = np.argmax(amplitudes > explode_threshold)
 if explode_idx:
     print(f"-- explodes at t = {t[explode_idx]}")
 
+
+########################################################################
+# Determine when (if at all) the solution forms a shock
+
+shock_threshold = 1.1 * amplitudes[0]
+shock_idx = np.argmax(amplitudes > shock_threshold)
+
+if shock_idx:
+    print(f"-- shock formation at t = {t[shock_idx]}")
+
 ########################################################################
 # Determine the artificial damping rate, sigma
 
@@ -60,7 +70,7 @@ if explode_idx:
 # to find sigma, fit amplitude to
 #   A(t) = A0 * exp(-sigma * t)
 
-damp_end_threshold = 4 * explode_threshold
+damp_end_threshold = shock_threshold
 damp_end_idx = np.argmax(amplitudes > damp_end_threshold) or len(t)
 [sigma], _ = optimize.curve_fit(
     lambda t, sigma: amplitudes[0] * np.exp(-sigma * t),
@@ -73,7 +83,7 @@ if mode == FANCY_OUTPUT_MODE:
     if sigma > 0:
         print(f"-- artificial damping rate = {sigma:.3}")
     else:
-        print(f"-- artificial growth rate >= {-sigma:.3}")
+        print(f"-- artificial growth rate ~= {-sigma:.3}")
 elif mode == BARE_OUTPUT_MODE:
     print(sigma)
     sys.exit()
@@ -82,7 +92,7 @@ elif mode == BARE_OUTPUT_MODE:
 # View the time evolution as an animated plot
 
 fig, ax = plt.subplots()
-ax.plot(t[:damp_end_idx], amplitudes[:damp_end_idx])
+ax.plot(t[:explode_idx], amplitudes[:explode_idx])
 
 ax.set_title(f"Burger's Equation, AB{params.which_AB}, cfl={float(params.cfl):.3}")
 ax.set_xlabel("$t$")
