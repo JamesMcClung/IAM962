@@ -25,9 +25,8 @@ seaborn.relplot(
     data=data,
     x="cfl",
     y="error",
-    # hue="nu",
-    # style="nu",
-    # palette=["r", "g", "b"],
-    # markers=["D", "S", "P"],
+    hue="nu",
+    style="nu",
+    palette=seaborn.color_palette(n_colors=len(set(data.nu))),
 )
 plt.show()
