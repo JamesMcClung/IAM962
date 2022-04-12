@@ -15,7 +15,7 @@ The main function is in `src/project1a.cc`.
 
 - `python/find_damping_rate.py` calculates the theoretical and experimental damping rates for a given output.
 - `python/plot.py` produces an animated plot of a given output. One such result is _heat.gif_.
-- `python/plot_analysis.py` displays a scatterplot of the results of `scripts/analyze.sh`. One such result is _err_vs_cfl.png_.
+- `python/plot_analysis.py` displays a scatterplot of the results of `scripts/analyze.sh`. One such result is *err_vs_cfl.png*.
 
 ## Damping Rates
 
