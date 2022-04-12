@@ -6,15 +6,31 @@ from scipy import optimize
 from util import reader
 
 ########################################################################
+# Constants for flags/mods
+
+BARE_OUTPUT_FLAG = "--bare"
+
+BARE_OUTPUT_MODE = "bare"  # only print artificial damping rate
+FANCY_OUTPUT_MODE = "fancy"  # plot and add descriptions
+
+mode = FANCY_OUTPUT_MODE
+
+########################################################################
 # Check number of arguments
 
-if len(sys.argv) != 2:
+args = sys.argv[1:]
+
+if BARE_OUTPUT_FLAG in args:
+    mode = BARE_OUTPUT_MODE
+    args.remove(BARE_OUTPUT_FLAG)
+
+if len(args) != 1:
     sys.exit(f"Usage: {sys.argv[0]} path/to/data.csv")
 
 ########################################################################
 # Load data to plot
 
-path = sys.argv[1]
+path = args[0]
 
 u, x, t, params = reader.read_uxtp(path)
 
@@ -46,12 +62,21 @@ if explode_idx:
 
 damp_end_threshold = 4 * explode_threshold
 damp_end_idx = np.argmax(amplitudes > damp_end_threshold) or len(t)
-[_, sigma], _ = optimize.curve_fit(lambda t, A0, sigma: A0 * np.exp(-sigma * t), t[:damp_end_idx], amplitudes[:damp_end_idx], p0=[amplitudes[0], 0])
+[sigma], _ = optimize.curve_fit(
+    lambda t, sigma: amplitudes[0] * np.exp(-sigma * t),
+    t[:damp_end_idx],
+    amplitudes[:damp_end_idx],
+    p0=[0],
+)
 
-if sigma >0:
-    print(f"-- artificial damping rate = {sigma:.3}")
-else:
-    print(f"-- artificial growth rate >= {-sigma:.3}")
+if mode == FANCY_OUTPUT_MODE:
+    if sigma > 0:
+        print(f"-- artificial damping rate = {sigma:.3}")
+    else:
+        print(f"-- artificial growth rate >= {-sigma:.3}")
+elif mode == BARE_OUTPUT_MODE:
+    print(sigma)
+    sys.exit()
 
 ########################################################################
 # View the time evolution as an animated plot
@@ -59,7 +84,7 @@ else:
 fig, ax = plt.subplots()
 ax.plot(t[:damp_end_idx], amplitudes[:damp_end_idx])
 
-ax.set_title(f"Burger's Equation, AB{params.which_AB}, cfl={params.cfl:.3}")
+ax.set_title(f"Burger's Equation, AB{params.which_AB}, cfl={float(params.cfl):.3}")
 ax.set_xlabel("$t$")
 ax.set_ylabel("Amplitude")
 
