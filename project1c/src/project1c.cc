@@ -83,14 +83,16 @@ void set_initial_dus(dus_type &dus, const u_type &u_initial) {
 }
 
 void solve_for_next_u(const u_type &u0, const dus_type &dus, u_type &next_u) {
-    if (which_AB == 1) {
+    if constexpr (which_AB == 1) {
         next_u = u0 + dus[0];
-    } else if (which_AB == 2) {
+    } else if constexpr (which_AB == 2) {
         next_u = u0 + (real(3) * dus[0] - dus[1]) / real(2);
-    } else if (which_AB == 3) {
+    } else if constexpr (which_AB == 3) {
         next_u = u0 + (real(23) * dus[0] - real(16) * dus[1] + real(5) * dus[2]) / real(12);
-    } else if (which_AB == 4) {
+    } else if constexpr (which_AB == 4) {
         next_u = u0 + (real(55) * dus[0] - real(59) * dus[1] + real(37) * dus[2] - real(9) * dus[3]) / real(24);
+    } else if constexpr (which_AB == 5) {
+        next_u = u0 + (real(1901) * dus[0] - real(2774) * dus[1] + real(2616) * dus[2] - real(1274) * dus[3] + real(251) * dus[4]) / real(720);
     }
 }
 
