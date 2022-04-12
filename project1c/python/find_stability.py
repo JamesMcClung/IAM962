@@ -45,9 +45,8 @@ amplitudes = (np.max(u, axis=1) - np.min(u, axis=1)) / 2
 explode_threshold = 10 * amplitudes[0]
 explode_idx = np.argmax(amplitudes > explode_threshold)
 
-if explode_idx:
+if mode != BARE_OUTPUT_MODE and explode_idx:
     print(f"-- explodes at t = {t[explode_idx]}")
-
 
 ########################################################################
 # Determine when (if at all) the solution forms a shock
@@ -55,7 +54,7 @@ if explode_idx:
 shock_threshold = 1.1 * amplitudes[0]
 shock_idx = np.argmax(amplitudes > shock_threshold)
 
-if shock_idx:
+if mode != BARE_OUTPUT_MODE and shock_idx:
     print(f"-- shock formation at t = {t[shock_idx]}")
 
 ########################################################################
