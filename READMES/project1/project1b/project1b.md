@@ -31,7 +31,7 @@ This is a sample gif of the time evolution of the wave equation. This run used a
 
 ## dr_vs_cfl.png
 
-This is a scatterplot of damping rate versus Courant number: `cfl = dt * c / dx`, and it can be used to calculate `dt` instead of setting `dt` directly. In all these runs, `dx=1/128`, although the grid spacing didn't seem to matter (compare to *dr_vs_cfl_256.png*, which had `dx=256`).
+This is a scatterplot of damping rate versus Courant number: `cfl = dt * c / dx`, which can be used to calculate `dt` instead of setting `dt` directly. In all these runs, `dx=1/128`, although the grid spacing didn't seem to matter (compare to *dr_vs_cfl_256.png*, which had `dx=256`).
 
 Apparently, `cfl` greater than about 1/2 is unstable, with AB4 exploding faster than AB2. I was worried that I implemented AB4 wrong, but AB5 proved to be even more unstable.
 
