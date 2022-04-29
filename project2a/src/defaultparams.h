@@ -4,6 +4,10 @@
 #define NU 1
 #endif
 
+#ifndef C
+#define C 1
+#endif
+
 #ifndef NX
 #define NX 128
 #endif
@@ -25,7 +29,7 @@
 #endif
 
 #ifndef DT
-#define DT (nu == 0 ? cfl * dx : cfl * dx * dx / nu)
+#define DT (nu == 0 ? cfl * dx / (c < 0 ? -c : c) : cfl * dx * dx / nu)
 #endif
 
 #ifndef WRITE_EVERY

@@ -32,9 +32,11 @@
 
 // AB2 solves u_t = F(u) explicitly as:
 //   v - u0 = dt/2 * (3*F(u0) - F(u1))
-// For this problem, F(uhat) = fft(ift(uhat) ** ift(K * uhat)), so
-//   v - u0 = 3 * B(u0) - B(u1)
-//   where B(uk) = dt/2 * fft(ift(uk) ** ift(K * uk))
+// For this problem, F(u) = -u * u_x which in Fourier space is
+//   F(uhat) = -fft(ift(uhat) ** ift(K * uhat))
+//   => v - u0 = 3 * B(u0) - B(u1)
+//   where
+//     B(uk) = -dt/2 * fft(ift(uk) ** ift(K * uk))
 
 // AM2 solves u_t = F(u) implicitly as:
 //   v - 5*dt/12 * F(v) = u0 + dt/12 * (8*F(u0) - F(u1))
@@ -45,9 +47,9 @@
 //     M0 = (I - 5*dt*nu/12 * K^2)^-1 * (I + 8*dt*nu/12 * K^2)
 //     M1 = -(I - 5*dt*nu/12 * K^2)^-1 * dt*nu/12 * K^2
 
-// Overall, we are calculating
-//   v = u0 + (M0*u0 + M1*u1 - u0) - (3 * B(u0) - B(u1))
-//     = M0*u0 + M1*u1 - 3*B(u0) + B(u1)
+// Combining the two solutions by adding them yields
+//   v = u0 + (M0*u0 + M1*u1 - u0) + (3 * B(u0) - B(u1))
+//     = M0*u0 + M1*u1 + 3*B(u0) - B(u1)
 
 ////////////////////////////////////////////////////////////////////////
 //                              PROGRAM                               //
@@ -73,7 +75,7 @@ auto elementwise_product(const M1 &m1, const M2 &m2) {
 }
 
 auto B(const uhat_type &uk) {
-    return dt / 2 * linalg::fft(elementwise_product(linalg::ifft(uk), linalg::ifft(K * uk)));
+    return -c * dt / 2 * linalg::fft(elementwise_product(linalg::ifft(uk), linalg::ifft(K * uk)));
 }
 
 auto real_part(const uhat_type &u) {
@@ -106,7 +108,7 @@ void set_to_initial_conditions(uhat_type &uhat) {
 }
 
 void solve_for_next_uhat(const uhat_type &u0, const uhat_type &u1, uhat_type &v) {
-    v = M0 * u0 + M1 * u1 - 3 * B(u0) + B(u1);
+    v = M0 * u0 + M1 * u1 + 3 * B(u0) - B(u1);
 }
 
 void write_params() {

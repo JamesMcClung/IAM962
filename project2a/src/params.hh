@@ -8,6 +8,7 @@ using real = double;                    // type for values of u
 using complex = linalg::Complex<real>;  // type for values of uhat
 
 static constexpr real nu = NU;                // diffusion coefficient
+static constexpr real c = C;                  // coefficient of nonlinear term (for testing purposes)
 static constexpr int nx = NX;                 // number of spatial gridpoints
 static constexpr int nt = NT;                 // time steps to run for
 static constexpr real min_x = MIN_X;          // lower bound for x domain
