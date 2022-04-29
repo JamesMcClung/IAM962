@@ -1,7 +1,7 @@
 #pragma once
 
 #include "buildparams.h"
-#include "defaultparams.h"  // default params must be included after build params
+#include "defaultparams.hh"  // default params must be included after build params
 #include "linalg/complex.hh"
 
 using real = double;                    // type for values of u
