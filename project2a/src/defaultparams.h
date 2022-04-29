@@ -1,5 +1,17 @@
 #pragma once
 
+namespace _params_util {
+template <typename T>
+constexpr T abs(T t) {
+    return t < 0 ? -t : t;
+}
+
+template <typename T>
+constexpr T min(T t1, T t2) {
+    return t1 < t2 ? t1 : t2;
+}
+}  // namespace _params_util
+
 #ifndef NU
 #define NU 1
 #endif
@@ -25,11 +37,11 @@
 #endif
 
 #ifndef CFL
-#define CFL 0.1
+#define CFL 16
 #endif
 
 #ifndef DT
-#define DT (nu == 0 ? cfl * dx / (c < 0 ? -c : c) : cfl * dx * dx / nu)
+#define DT (cfl * _params_util::min(dx / _params_util::abs(c), dx * dx / nu))
 #endif
 
 #ifndef WRITE_EVERY
