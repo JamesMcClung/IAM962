@@ -13,7 +13,7 @@ constexpr T min(T t1, T t2) {
 }  // namespace _params_util
 
 #ifndef NU
-#define NU 1
+#define NU .1
 #endif
 
 #ifndef C

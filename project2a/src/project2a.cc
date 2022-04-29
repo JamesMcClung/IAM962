@@ -6,6 +6,7 @@
 #include "linalg/fullmatrix.hh"
 #include "linalg/matrix_io.hh"
 #include "params.hh"
+#include "util.hh"
 
 ////////////////////////////////////////////////////////////////////////
 //                            DESCRIPTION                             //
@@ -58,34 +59,12 @@
 static linalg::BandedMatrix<nx, 0, 0, complex> K, M0, M1;
 using uhat_type = linalg::FullMatrix<nx, 1, complex>;
 
-template <class M1, class M2>
-auto elementwise_product(const M1 &m1, const M2 &m2) {
-    static_assert(M1::nrows == M2::nrows, "Cannot take elementwise product if dimensions don't match");
-    static_assert(M1::ncols == M2::ncols, "Cannot take elementwise product if dimensions don't match");
-
-    linalg::FullMatrix<M1::nrows, M1::ncols, decltype(m1(0, 0) * m2(0, 0))> res;
-
-    for (int i = 0; i < M1::nrows; i++) {
-        for (int j = 0; j < M1::ncols; j++) {
-            res(i, j) = m1(i, j) * m2(i, j);
-        }
-    }
-
-    return res;
-}
-
 auto B(const uhat_type &uk) {
-    return -c * dt / 2 * linalg::fft(elementwise_product(linalg::ifft(uk), linalg::ifft(K * uk)));
+    // B(uk) = -dt/2 * fft(ift(uk) ** ift(K * uk))
+    return -c * dt / 2 * linalg::fft(util::elementwise_product(linalg::ifft(uk), linalg::ifft(K * uk)));
 }
 
-auto real_part(const uhat_type &u) {
-    linalg::FullMatrix<nx, 1, real> u_real;
-    for (int i = 0; i < nx; i++)
-        u_real(i, 0) = u(i, 0).real;
-    return u_real;
-}
-
-void initialize_static_matricies() {
+void initialize_static_matrices() {
     // initialize K
     for (int k = 0; k < nx / 2; k++)
         K(k, k) = complex(0, k);
@@ -102,7 +81,7 @@ void initialize_static_matricies() {
 }
 
 void set_to_initial_conditions(uhat_type &uhat) {
-    // sin(x) = 1/2i * exp(ix) - 1/2i * exp(-ix)
+    // note that sin(x) = 1/2i * exp(ix) - 1/2i * exp(-ix)
     uhat(1, 0) = complex(0, -.5);
     uhat(nx - 1, 0) = complex(0, .5);
 }
@@ -117,7 +96,7 @@ void write_params() {
 }
 
 void write_u(const uhat_type &u) {
-    linalg::saveMatrix_transpose(out_file, real_part(u), true);
+    linalg::saveMatrix_transpose(out_file, util::real_part(u), true);
 }
 
 int main() {
@@ -127,7 +106,7 @@ int main() {
 
     set_to_initial_conditions(*last_uhat);
     set_to_initial_conditions(*this_uhat);
-    initialize_static_matricies();
+    initialize_static_matrices();
 
     write_params();
     write_u(linalg::ifft(*this_uhat));
