@@ -19,13 +19,13 @@ class Params:
         self.nt_out = 1 + self.nt // self.write_every
 
 
-def read_uxtp(path: str):
+def read_uxtp(path: str, param_names: list):
     """Parse u, x, t, and params from the specified output file."""
     with open(path) as file:
         line_iter = csv.reader(file, delimiter=" ")
 
         # read parameters
-        params = Params("nu", "nx", "nt", "min_x", "max_x", "dx", "dt", "write_every", "cfl")
+        params = Params(*param_names)
         params.parse(next(line_iter))
 
         # prep variables

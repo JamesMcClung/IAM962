@@ -31,7 +31,8 @@ if len(args) != 1:
 
 path = args[0]
 
-u, x, t, params = reader.read_uxtp(path)
+param_names = ["nu", "nx", "nt", "min_x", "max_x", "dx", "dt", "write_every", "cfl"]
+u, x, t, params = reader.read_uxtp(path, param_names)
 
 ########################################################################
 # View the time evolution as an animated plot
