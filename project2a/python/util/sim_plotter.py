@@ -5,7 +5,7 @@ import matplotlib.animation as animation
 from util import reader
 
 
-def plot():
+def plot(param_names: list, title_func):
     ########################################################################
     # Constants for flags/mods
 
@@ -33,7 +33,6 @@ def plot():
 
     path = args[0]
 
-    param_names = ["nu", "nx", "nt", "min_x", "max_x", "dx", "dt", "write_every", "cfl"]
     u, x, t, params = reader.read_uxtp(path, param_names)
 
     ########################################################################
@@ -43,7 +42,8 @@ def plot():
     (line,) = ax.plot(x, u[0])
 
     def animate(i):
-        ax.set_title(f"Burger's Equation, dt={params.dt}, $\\nu={params.nu}$: $t={t[i]:.2f}$")
+        # ax.set_title(f"Burger's Equation, dt={params.dt}, $\\nu={params.nu}$: $t={t[i]:.2f}$")
+        ax.set_title(title_func(params, t[i]))
         line.set_ydata(u[i])
         return line, ax
 
