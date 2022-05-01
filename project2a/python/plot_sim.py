@@ -5,8 +5,7 @@ project_root = __file__[: __file__.find("project2a") - 1]
 sys.path.append(project_root)
 
 from python.util import sim_plotter
-
-param_names = ["nu", "nx", "nt", "min_x", "max_x", "dx", "dt", "write_every", "cfl"]
+from util.param_names import param_names
 
 
 def title_func(params, time):
