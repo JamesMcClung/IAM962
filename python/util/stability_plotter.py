@@ -48,8 +48,11 @@ def plot(param_names: list, title_func):
     explode_threshold = 10 * amplitudes[0]
     explode_idx = np.argmax(amplitudes > explode_threshold)
 
-    if mode != BARE_OUTPUT_MODE and explode_idx:
-        print(f"-- explodes at t = {t[explode_idx]}")
+    if mode != BARE_OUTPUT_MODE:
+        if explode_idx:
+            print(f"-- explodes at t = {t[explode_idx]}")
+        else:
+            print("-- does not explode")
 
     ########################################################################
     # Determine when (if at all) the solution forms a shock
@@ -57,8 +60,11 @@ def plot(param_names: list, title_func):
     shock_threshold = 1.1 * amplitudes[0]
     shock_idx = np.argmax(amplitudes > shock_threshold)
 
-    if mode != BARE_OUTPUT_MODE and shock_idx:
-        print(f"-- shock formation at t = {t[shock_idx]}")
+    if mode != BARE_OUTPUT_MODE:
+        if shock_idx:
+            print(f"-- shock formation at t = {t[shock_idx]}")
+        else:
+            print("-- does not form shock")
 
     ########################################################################
     # Determine the damping rate, sigma
@@ -87,10 +93,16 @@ def plot(param_names: list, title_func):
     ########################################################################
     # View the time evolution as an animated plot
 
-    fig, ax = plt.subplots()
-    end_idx = explode_idx or shock_idx or -1
-    ax.plot(t[:end_idx], amplitudes[:end_idx])
+    _, ax = plt.subplots()
+    end_idx = explode_idx or shock_idx or len(t)
+    ax.plot(t[:end_idx], amplitudes[:end_idx], label="Actual")
+    ax.plot(
+        t[:damp_end_idx],
+        amplitudes[0] * np.exp(-sigma * t[:damp_end_idx]),
+        label=f"Exponential fit: $A_0 e^{{-\\sigma t}}, \\sigma={sigma:.3f}$",
+    )
 
+    ax.legend()
     ax.set_title(title_func(params))
     ax.set_xlabel("$t$")
     ax.set_ylabel("Amplitude")
