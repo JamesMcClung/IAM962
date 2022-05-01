@@ -27,8 +27,9 @@
 //   uhat^{n+1}_j     -> v
 //   uhat = fft(u) as defined by linalg::fft
 //   K is the diagonal matrix with imaginary entries
-//     i * [0, 1, ..., N/2-1, -N/2, -N/2+1, ..., -2, -1]
-//     so fft(du/dx) = K * fft(u) = K * uhat
+//     2*pi*i * [0, 1, ..., N/2-1, -N/2, -N/2+1, ..., -2, -1]
+//     so fft(du/dx) = K * fft(u) = K * uhat (note the factor of 2pi,
+//     which comes from the domain being remapped from [0,1] to [0,2pi])
 //   ** denotes elementwise multiplication
 
 // AB2 solves u_t = F(u) explicitly as:
@@ -67,9 +68,9 @@ auto B(const uhat_type &uk) {
 void initialize_static_matrices() {
     // initialize K
     for (int k = 0; k < nx / 2; k++)
-        K(k, k) = complex(0, k);
+        K(k, k) = 2 * M_PI * complex(0, k);
     for (int k = nx / 2; k < nx; k++)
-        K(k, k) = complex(0, k - nx);
+        K(k, k) = 2 * M_PI * complex(0, k - nx);
 
     // initialize M0 = (I - 5*dt*nu/12 * K^2)^-1 * (I + 8*dt*nu/12 * K^2)
     // and        M1 = -(I - 5*dt*nu/12 * K^2)^-1 * dt*nu/12 * K^2

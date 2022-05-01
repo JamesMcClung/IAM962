@@ -37,7 +37,7 @@ constexpr T min(T t1, T t2) {
 #endif
 
 #ifndef CFL
-#define CFL 16
+#define CFL .5
 #endif
 
 #ifndef DT
