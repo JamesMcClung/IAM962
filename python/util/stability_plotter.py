@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from scipy import optimize
-from . import sim_reader
+from . import out_reader
 
 
 def plot(param_names: list, title_func):
@@ -35,7 +35,7 @@ def plot(param_names: list, title_func):
 
     path = args[0]
 
-    u, _, t, params = sim_reader.read_uxtp(path, param_names)
+    u, _, t, params = out_reader.read_uxtp(path, param_names)
 
     ########################################################################
     # Calculate amplitude of wave for each time
