@@ -29,7 +29,7 @@ def read_uxtp(path: str, param_names: list):
         params.parse(next(line_iter))
 
         # prep variables
-        x = np.arange(params.min_x, params.max_x, params.dx)
+        x = np.linspace(params.min_x, params.max_x, params.nx, endpoint=False)
         t = np.zeros(params.nt_out)
         u = np.zeros([params.nt_out, params.nx])
 
