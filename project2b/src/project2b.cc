@@ -37,12 +37,13 @@
 
 // AM2 solves u_t = F(u) implicitly as:
 //   v - 5*dt/12 * F(v) = u0 + dt/12 * (8*F(u0) - F(u1))
-// For this problem, F(u) = nu * u_xx = nu * d1^2 * u, so
-//   (I - 5*dt*nu/12 * d1^2) * v = u0 + dt*nu/12 * d1^2 * (8 * u0 - u1)
+// For this problem, F(u) = nu * u_xx = nu * d2 * u, so
+//   (I - 5*dt*nu/12 * d2) * v = u0 + dt*nu/12 * d2 * (8*u0 - u1)
+//     = (I + 8*dt*nu/12 * d2) * u0 - dt*nu/12 * d2 * u1
 //   => v - u0 = M0*u0 + M1*u1 - u0
 //   with diagonal matrices
-//     M0 = (I - 5*dt*nu/12 * d1^2)^-1 * (I + 8*dt*nu/12 * d1^2)
-//     M1 = -(I - 5*dt*nu/12 * d1^2)^-1 * dt*nu/12 * d1^2
+//     M0 = (I - 5*dt*nu/12 * d2)^-1 * (I + 8*dt*nu/12 * d2)
+//     M1 = -(I - 5*dt*nu/12 * d2)^-1 * dt*nu/12 * d2
 
 // Combining the two solutions by adding them yields
 //   v = u0 + (M0*u0 + M1*u1 - u0) + (3 * B(u0) - B(u1))
@@ -99,8 +100,8 @@ void initialize_static_matrices() {
         }
     }
 
-    // initialize M0 = (I - 5*dt*nu/12 * d1^2)^-1 * (I + 8*dt*nu/12 * d1^2)
-    // and        M1 = -(I - 5*dt*nu/12 * d1^2)^-1 * dt*nu/12 * d1^2
+    // initialize M0 = (I - 5*dt*nu/12 * d2)^-1 * (I + 8*dt*nu/12 * d2)
+    // and        M1 = -(I - 5*dt*nu/12 * d2)^-1 * dt*nu/12 * d2
     auto d2 = d1 * d1;
     auto lup = linalg::LUP_Decomp(I - 5 * dt * nu / 12 * d2);
     M0 = lup.solve(I + 8 * dt * nu / 12 * d2);
