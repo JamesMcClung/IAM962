@@ -18,3 +18,4 @@ add_subdirectory(project1b)
 add_subdirectory(project1c)
 
 add_subdirectory(project2a)
+add_subdirectory(project2b)
