@@ -7,7 +7,7 @@ from scipy import optimize
 from . import out_reader
 
 
-def plot(param_names: list, title_func):
+def plot(param_names: list, title_func, explicit_x: bool = False):
     ########################################################################
     # Constants for flags/mods
 
@@ -35,7 +35,7 @@ def plot(param_names: list, title_func):
 
     path = args[0]
 
-    u, _, t, params = out_reader.read_uxtp(path, param_names)
+    u, _, t, params = out_reader.read_uxtp(path, param_names, explicit_x)
 
     ########################################################################
     # Calculate amplitude of wave for each time

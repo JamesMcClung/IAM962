@@ -19,7 +19,7 @@ class Params:
         self.nt_out = 1 + self.nt // self.write_every
 
 
-def read_uxtp(path: str, param_names: list):
+def read_uxtp(path: str, param_names: list, explicit_x: bool = False):
     """Parse u, x, t, and params from the specified output file."""
     with open(path) as file:
         line_iter = csv.reader(file, delimiter=" ")
@@ -29,7 +29,10 @@ def read_uxtp(path: str, param_names: list):
         params.parse(next(line_iter))
 
         # prep variables
-        x = np.linspace(params.min_x, params.max_x, params.nx, endpoint=False)
+        if explicit_x:
+            x = np.array(list(map(float, next(line_iter))))
+        else:
+            x = np.linspace(params.min_x, params.max_x, params.nx, endpoint=False)
         t = np.zeros(params.nt_out)
         u = np.zeros([params.nt_out, params.nx])
 
