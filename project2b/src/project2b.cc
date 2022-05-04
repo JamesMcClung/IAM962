@@ -67,6 +67,10 @@ real c_bar(int i) {
     return 1;
 }
 
+real sq(real a) {
+    return a * a;
+}
+
 void initialize_static_matrices() {
     // initialize x
     for (int i = 0; i < nx; i++) {
@@ -83,13 +87,13 @@ void initialize_static_matrices() {
     for (int i = 0; i < nx; i++) {
         for (int j = 0; j < nx; j++) {
             if (i != j) {
-                d1(i, j) = (i + j % 2 == 0 ? 1 : -1) * c_bar(i) / (c_bar(j) * (x(i, 0) - x(j, 0)));
+                d1(i, j) = ((i + j) % 2 == 0 ? 1 : -1) * c_bar(i) / (c_bar(j) * (x(i, 0) - x(j, 0)));
             } else if (i == 0) {
-                d1(i, j) = (1 + 2 * nx * nx) / 6;
+                d1(i, j) = (1 + 2 * sq(nx - 1)) / 6;
             } else if (i == nx - 1) {
-                d1(i, j) = -(1 + 2 * nx * nx) / 6;
+                d1(i, j) = -(1 + 2 * sq(nx - 1)) / 6;
             } else {
-                d1(i, j) = -x(i, 0) / (2 * (1 - x(i, 0) * x(j, 0)));
+                d1(i, j) = -x(i, 0) / (2 - 2 * sq(x(i, 0)));
             }
             d1(i, j) *= 2;  // to account for remapping [0,1] to [-1,1]
         }
