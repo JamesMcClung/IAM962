@@ -42,7 +42,6 @@ def plot(param_names: list, title_func, explicit_x: bool = False):
     (line,) = ax.plot(x, u[0])
 
     def animate(i):
-        # ax.set_title(f"Burger's Equation, dt={params.dt}, $\\nu={params.nu}$: $t={t[i]:.2f}$")
         ax.set_title(title_func(params, t[i]))
         line.set_ydata(u[i])
         return line, ax
