@@ -25,29 +25,35 @@
 //   u^{n-k}_{j-1} -> uk_     (k = 0, 1, ...)
 //   u^{n-k}_{j+1} -> uk^     (k = 0, 1, ...)
 //   u^{n+1}_j     -> v
+//   du = v - u0 for a given term (the linear or nonlinear term)
 //   d1 is the matrix used to differentiate a function on the CGL grid
 //   ** denotes elementwise multiplication
 
 // AB2 solves u_t = F(u) explicitly as:
-//   v - u0 = dt/2 * (3*F(u0) - F(u1))
-// For this problem, F(u) = -u * u_x, so
-//   v - u0 = 3 * B(u0) - B(u1)
-//   where
-//     B(uk) = -dt/2 * uk ** (d1 * uk)
+//   du = dt/2 * (3*F(u0) - F(u1))
+// For this problem, F(u) = -u ** u_x = -u ** (d1 * u), so
+//   du = -dt/2 * (3*u0 ** (d1*u0) - u1 ** (d1*u1))
+//      = 3*b0 - b1
+//   where bk = -dt/2 * uk ** (d1*uk)
 
 // AM2 solves u_t = F(u) implicitly as:
-//   v - 5*dt/12 * F(v) = u0 + dt/12 * (8*F(u0) - F(u1))
-// For this problem, F(u) = nu * u_xx = nu * d2 * u, so
-//   (I - 5*dt*nu/12 * d2) * v = u0 + dt*nu/12 * d2 * (8*u0 - u1)
-//     = (I + 8*dt*nu/12 * d2) * u0 - dt*nu/12 * d2 * u1
-//   => v - u0 = M0*u0 + M1*u1 - u0
-//   with diagonal matrices
-//     M0 = (I - 5*dt*nu/12 * d2)^-1 * (I + 8*dt*nu/12 * d2)
-//     M1 = -(I - 5*dt*nu/12 * d2)^-1 * dt*nu/12 * d2
+//   du = dt/12 * (5*F(v) + 8*F(u0) - F(u1))
+// For this problem, F(u) = nu * u_xx = nu * d2 * u
+//   => du = dt*nu/12 * d2 * (5*v + 8*u0 - u1)
+//         = 5 * H * v + H * (8*u0 - u1)
+//   where H = dt*nu/12 * d2
 
 // Combining the two solutions by adding them yields
-//   v = u0 + (M0*u0 + M1*u1 - u0) + (3 * B(u0) - B(u1))
-//     = M0*u0 + M1*u1 + 3*B(u0) - B(u1)
+//   v = u0 + (3*b0 - b1) + (5 * H * v + H * (8*u0 - u1))
+//   => v - 5*H*v = u0 + 3*b0 - b1 + H*(8*u0 - u1)
+//   => v = inv(A) * (u0 + 3*b0 - b1 + H*(8*u0 - u1))
+//   where A = I - 5*H
+
+// Consequently, the following are stored:
+// d1, H
+// the LUP decomposition of A
+// u0, u1, v
+// b0, b1
 
 ////////////////////////////////////////////////////////////////////////
 //                              PROGRAM                               //
@@ -56,10 +62,11 @@
 using u_type = linalg::FullMatrix<nx, 1, real>;
 
 static u_type x, x_actual;
-static linalg::FullMatrix<nx, nx, real> I(0), d1, M0, M1;
+static linalg::FullMatrix<nx, nx, real> d1, H;
+static linalg::LUP_Decomp<linalg::FullMatrix<nx, nx, real>> *lupA_ptr;
 
-auto B(const u_type &uk) {
-    return -c * dt / 2 * util::elementwise_product(uk, d1 * uk);
+void calculate_bk(const u_type &uk, u_type &bk) {
+    bk = -dt / 2 * util::elementwise_product(uk, d1 * uk);
 }
 
 real c_bar(int i) {
@@ -79,11 +86,6 @@ void initialize_static_matrices() {
         x_actual(i, 0) = (1 + x(i, 0)) / 2;
     }
 
-    // initialize I (identity matrix)
-    for (int i = 0; i < nx; i++) {
-        I(i, i) = 1;
-    }
-
     // initialize d1 (lots of ifs, but readable and only runs once)
     for (int i = 0; i < nx; i++) {
         for (int j = 0; j < nx; j++) {
@@ -100,12 +102,17 @@ void initialize_static_matrices() {
         }
     }
 
-    // initialize M0 = (I - 5*dt*nu/12 * d2)^-1 * (I + 8*dt*nu/12 * d2)
-    // and        M1 = -(I - 5*dt*nu/12 * d2)^-1 * dt*nu/12 * d2
+    // initialize I (identity matrix)
+    linalg::FullMatrix<nx, nx, real> I(0);
+    for (int i = 0; i < nx; i++) {
+        I(i, i) = 1;
+    }
+
     auto d2 = d1 * d1;
-    auto lup = linalg::LUP_Decomp(I - 5 * dt * nu / 12 * d2);
-    M0 = lup.solve(I + 8 * dt * nu / 12 * d2);
-    M1 = -lup.solve(dt * nu / 12 * d2);
+
+    H = dt * nu / 12 * d2;
+
+    lupA_ptr = new linalg::LUP_Decomp(I - 5 * H);
 }
 
 void set_to_initial_conditions(u_type &u) {
@@ -114,8 +121,8 @@ void set_to_initial_conditions(u_type &u) {
     }
 }
 
-void solve_for_next_u(const u_type &u0, const u_type &u1, u_type &v) {
-    v = M0 * u0 + M1 * u1 + 3 * B(u0) - B(u1);
+void solve_for_next_u(const u_type &u0, const u_type &u1, const u_type &b0, const u_type &b1, u_type &v) {
+    v = lupA_ptr->solve(u0 + 3 * b0 - b1 + H * (8 * u0 - u1));
 }
 
 void write_params() {
@@ -131,10 +138,13 @@ int main() {
     std::unique_ptr<u_type> last_u(new u_type);
     std::unique_ptr<u_type> this_u(new u_type);
     std::unique_ptr<u_type> next_u(new u_type);
+    std::unique_ptr<u_type> this_b(new u_type);
+    std::unique_ptr<u_type> last_b(new u_type);
 
     initialize_static_matrices();
     set_to_initial_conditions(*last_u);
     set_to_initial_conditions(*this_u);
+    calculate_bk(*last_u, *last_b);
 
     write_params();
     write_u(x_actual);
@@ -142,13 +152,14 @@ int main() {
 
     for (int w = 0; w < nt / write_every; w++) {
         for (int i = 0; i < write_every; i++) {
-            solve_for_next_u(*this_u, *last_u, *next_u);
+            calculate_bk(*this_u, *this_b);
+            solve_for_next_u(*this_u, *last_u, *this_b, *last_b, *next_u);
 
-            // cycle resources
-            // this -> last -> next -> this
-
+            // cycle resources: this -> last -> next -> this
             last_u.swap(this_u);
             next_u.swap(this_u);
+
+            last_b.swap(this_b);
         }
         write_u(*this_u);
     }
