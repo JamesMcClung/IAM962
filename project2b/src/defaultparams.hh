@@ -7,8 +7,8 @@ constexpr T abs(T t) {
 }
 
 template <typename T>
-constexpr T min(T t1, T t2) {
-    return t1 < t2 ? t1 : t2;
+constexpr T max(T t1, T t2) {
+    return t1 > t2 ? t1 : t2;
 }
 }  // namespace _params_util
 
@@ -41,7 +41,7 @@ constexpr T min(T t1, T t2) {
 #endif
 
 #ifndef DT
-#define DT (cfl * _params_util::min(1 / (nx * _params_util::abs(c)), 1 / (nx * nx * nu)))
+#define DT (cfl / _params_util::max(nx * _params_util::abs(c), (nx * nx * nu)))
 #endif
 
 #ifndef WRITE_EVERY
