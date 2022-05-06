@@ -66,7 +66,7 @@ static linalg::FullMatrix<nx, nx, real> d1, H;
 static linalg::LUP_Decomp<linalg::FullMatrix<nx, nx, real>> *lupA_ptr;
 
 void calculate_bk(const u_type &uk, u_type &bk) {
-    bk = -dt / 2 * util::elementwise_product(uk, d1 * uk);
+    bk = -c * dt / 2 * util::elementwise_product(uk, d1 * uk);
 }
 
 real c_bar(int i) {
@@ -108,9 +108,7 @@ void initialize_static_matrices() {
         I(i, i) = 1;
     }
 
-    auto d2 = d1 * d1;
-
-    H = dt * nu / 12 * d2;
+    H = dt * nu / 12 * d1 * d1;
 
     lupA_ptr = new linalg::LUP_Decomp(I - 5 * H);
 }
@@ -119,6 +117,9 @@ void set_to_initial_conditions(u_type &u) {
     for (int i = 0; i < nx; i++) {
         u(i, 0) = std::sin(2 * M_PI * x_actual(i, 0));
     }
+    // set them to exactly 0, not just 0 within machine precision
+    u(0, 0) = 0;
+    u(nx - 1, 0) = 0;
 }
 
 void solve_for_next_u(const u_type &u0, const u_type &u1, const u_type &b0, const u_type &b1, u_type &v) {
