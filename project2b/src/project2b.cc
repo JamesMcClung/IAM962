@@ -160,9 +160,9 @@ int main() {
             calculate_bk(*this_u, *this_b);
             solve_for_next_u(*this_u, *last_u, *this_b, *last_b, *next_u);
 
-            // cycle resources: this -> last -> next -> this
+            // cycle resources: last <- this <- next
             last_u.swap(this_u);
-            next_u.swap(this_u);
+            this_u.swap(next_u);
 
             last_b.swap(this_b);
         }
