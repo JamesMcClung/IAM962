@@ -109,7 +109,7 @@ void initialize_static_matrices() {
         I(i, i) = 1;
     }
 
-    H = dt * nu / 12 * d1 * d1;
+    H = d1 * d1 * dt * nu / 12;
     // handle BCs by zeroing out top and bottom rows
     for (int c = 0; c < nx; c++)
         H(0, c) = H(nx - 1, c) = 0;
