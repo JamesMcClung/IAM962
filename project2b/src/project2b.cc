@@ -90,7 +90,8 @@ void initialize_static_matrices() {
     for (int i = 0; i < nx; i++) {
         for (int j = 0; j < nx; j++) {
             if (i != j) {
-                d1(i, j) = ((i + j) % 2 == 0 ? 1 : -1) * c_bar(i) / (c_bar(j) * (x(i, 0) - x(j, 0)));
+                real sign = (i + j) % 2 == 0 ? 1 : -1;
+                d1(i, j) = sign * c_bar(i) / (c_bar(j) * (x(i, 0) - x(j, 0)));
             } else if (i == 0) {
                 d1(i, j) = (1 + 2 * sq(nx - 1)) / 6;
             } else if (i == nx - 1) {
@@ -109,6 +110,9 @@ void initialize_static_matrices() {
     }
 
     H = dt * nu / 12 * d1 * d1;
+    // handle BCs by zeroing out top and bottom rows
+    for (int c = 0; c < nx; c++)
+        H(0, c) = H(nx - 1, c) = 0;
 
     lupA_ptr = new linalg::LUP_Decomp(I - 5 * H);
 }
