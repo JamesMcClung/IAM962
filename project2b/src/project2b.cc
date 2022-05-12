@@ -36,23 +36,23 @@
 //      = 3*b0 - b1
 //   where bk = -dt/2 * uk ** (d1*uk)
 
-// AM2 solves u_t = F(u) implicitly as:
-//   du = dt/12 * (5*F(v) + 8*F(u0) - F(u1))
+// AM1 solves u_t = F(u) implicitly as:
+//   du = dt/2 * (F(v) + F(u0))
 // For this problem, F(u) = nu * u_xx = nu * d2 * u
-//   => du = dt*nu/12 * d2 * (5*v + 8*u0 - u1)
-//         = 5 * H * v + H * (8*u0 - u1)
-//   where H = dt*nu/12 * d2
+//   => du = dt*nu/2 * d2 * (v + u0)
+//         = H * v + H * u0
+//   where H = dt*nu/2 * d2
 
 // Combining the two solutions by adding them yields
-//   v = u0 + (3*b0 - b1) + (5 * H * v + H * (8*u0 - u1))
-//   => v - 5*H*v = u0 + 3*b0 - b1 + H*(8*u0 - u1)
-//   => v = inv(A) * (u0 + 3*b0 - b1 + H*(8*u0 - u1))
-//   where A = I - 5*H
+//   v = u0 + (3*b0 - b1) + (H * v + H * u0)
+//   => v - H*v = u0 + 3*b0 - b1 + H*u0
+//   => v = inv(A) * (u0 + 3*b0 - b1 + H*u0)
+//   where A = I - H
 
 // Consequently, the following are stored:
 // d1, H
 // the LUP decomposition of A
-// u0, u1, v
+// u0, v
 // b0, b1
 
 ////////////////////////////////////////////////////////////////////////
@@ -109,12 +109,12 @@ void initialize_static_matrices() {
         I(i, i) = 1;
     }
 
-    H = d1 * d1 * dt * nu / 12;
+    H = d1 * d1 * dt * nu / 2;
     // handle BCs by zeroing out top and bottom rows
     for (int c = 0; c < nx; c++)
         H(0, c) = H(nx - 1, c) = 0;
 
-    lupA_ptr = new linalg::LUP_Decomp(I - 5 * H);
+    lupA_ptr = new linalg::LUP_Decomp(I - H);
 }
 
 void set_to_initial_conditions(u_type &u) {
@@ -126,8 +126,8 @@ void set_to_initial_conditions(u_type &u) {
     u(nx - 1, 0) = 0;
 }
 
-void solve_for_next_u(const u_type &u0, const u_type &u1, const u_type &b0, const u_type &b1, u_type &v) {
-    v = lupA_ptr->solve(u0 + 3 * b0 - b1 + H * (8 * u0 - u1));
+void solve_for_next_u(const u_type &u0, const u_type &b0, const u_type &b1, u_type &v) {
+    v = lupA_ptr->solve(u0 + 3 * b0 - b1 + H * u0);
 }
 
 void write_params() {
@@ -140,16 +140,14 @@ void write_u(const u_type &u) {
 }
 
 int main() {
-    std::unique_ptr<u_type> last_u(new u_type);
     std::unique_ptr<u_type> this_u(new u_type);
     std::unique_ptr<u_type> next_u(new u_type);
     std::unique_ptr<u_type> this_b(new u_type);
     std::unique_ptr<u_type> last_b(new u_type);
 
     initialize_static_matrices();
-    set_to_initial_conditions(*last_u);
     set_to_initial_conditions(*this_u);
-    calculate_bk(*last_u, *last_b);
+    calculate_bk(*this_u, *last_b);
 
     write_params();
     write_u(x_actual);
@@ -158,12 +156,10 @@ int main() {
     for (int w = 0; w < nt / write_every; w++) {
         for (int i = 0; i < write_every; i++) {
             calculate_bk(*this_u, *this_b);
-            solve_for_next_u(*this_u, *last_u, *this_b, *last_b, *next_u);
+            solve_for_next_u(*this_u, *this_b, *last_b, *next_u);
 
-            // cycle resources: last <- this <- next
-            last_u.swap(this_u);
+            // cycle resources
             this_u.swap(next_u);
-
             last_b.swap(this_b);
         }
         write_u(*this_u);
