@@ -44,8 +44,16 @@ constexpr T min(T t1, T t2) {
 #define IC "packet"
 #endif
 
+#ifndef K
+#define K -16
+#endif
+
 #ifndef POTENTIAL
 #define POTENTIAL "none"
+#endif
+
+#ifndef V0
+#define V0 500
 #endif
 
 #ifndef OUT_MODE

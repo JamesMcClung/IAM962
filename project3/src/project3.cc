@@ -92,16 +92,8 @@ void initialize_static_matrices() {
         // wall around 3/4 mark
         int wall_start = 3 * nx / 4;
         int wall_end = wall_start + nx / 64;
-        real wall_height = 500;
         for (int i = wall_start; i < wall_end; i++)
-            V(i, 0) = wall_height;
-    } else if constexpr (potential.compare("well") == 0) {
-        // well around 3/4 mark
-        int well_start = 3 * nx / 4;
-        int well_end = well_start + nx / 64;
-        real well_height = -500;
-        for (int i = well_start; i < well_end; i++)
-            V(i, 0) = well_height;
+            V(i, 0) = v0;
     }
 }
 
@@ -109,7 +101,6 @@ void set_to_initial_conditions(uhat_type &uhat) {
     uhat_type u;
 
     if constexpr (ic.compare("wave") == 0) {
-        real k = 4;
         for (int i = 0; i < nx; i++) {
             real x = min_x + i * dx;
             u(i, 0) = complex(std::cos(k * x), std::sin(k * x));
@@ -124,7 +115,6 @@ void set_to_initial_conditions(uhat_type &uhat) {
     } else if constexpr (ic.compare("packet") == 0) {
         real mean = (min_x + max_x) / 8.;
         real std = len_x / 32.;
-        real k = -16;
         for (int i = 0; i < nx; i++) {
             real x = min_x + i * dx;
             real envelope = std::exp(-util::square((x - mean) / std) / 2);

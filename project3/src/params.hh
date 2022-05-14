@@ -19,7 +19,9 @@ static constexpr real len_x = max_x - min_x;              // length of x domain
 static constexpr real dx = len_x / nx;                    // distance between spatial gridpoints
 static constexpr real dt = DT;                            // time between time steps
 static constexpr std::string_view ic = IC;                // initial conditions (wave, gauss, packet)
-static constexpr std::string_view potential = POTENTIAL;  // type of potential (none, wall, well)
+static constexpr real k = K;                              // wave number for ICs (may be unused)
+static constexpr std::string_view potential = POTENTIAL;  // type of potential (none, wall)
+static constexpr real v0 = V0;                            // potential coefficient (may be unused)
 
 static constexpr std::string_view out_mode(OUT_MODE);  // whether to write real, imaginary, or mag2
 static constexpr int write_every = WRITE_EVERY;        // write u every <this many> time steps
@@ -33,7 +35,9 @@ static constexpr auto out_file = OUT_FILE;             // path to output
 #undef MAX_X
 #undef DT
 #undef IC
+#undef K
 #undef POTENTIAL
+#undef V0
 #undef OUT_MODE
 #undef WRITE_EVERY
 #undef OUT_FILE
