@@ -46,10 +46,8 @@ def read_uxtp(path: str, param_names: list, explicit_x: bool = False, num_aux_da
         u = np.zeros([params.nt_out, params.nx])
 
         # read data
-        i = 0
-        for line in line_iter:
+        for i, line in enumerate(line_iter):
             t[i] = i * params.dt * params.write_every
             u[i] = _line2nparray(line)
-            i += 1
 
     return u, x, t, params
