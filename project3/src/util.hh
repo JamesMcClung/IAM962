@@ -4,11 +4,11 @@
 
 namespace util {
 
-template <class Matrix>
-void apply_nonlinear_op(Matrix &m) {
+template <class Matrix, typename Real>
+void apply_nonlinear_op(Matrix &u, Real b, const Matrix &V) {
     for (int i = 0; i < Matrix::nrows; i++) {
         for (int j = 0; j < Matrix::ncols; j++) {
-            m(i, j) *= m(i, j).mag2();
+            u(i, j) *= b * u(i, j).mag2() - V(i, j);
         }
     }
 }

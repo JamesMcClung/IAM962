@@ -16,10 +16,11 @@
 // Month: May 2022
 
 // This program solves a nonlinear Schrodinger equation,
-//     u_t = i*a*u_xx + i*b*|u|^2*u  (a,b real)
+//     u_t = i*a*u_xx + i*b*|u|^2*u - i*V*u  (a,b,V real; V=V(x))
 //   on the periodic domain [min_x, max_x) using the Fourier-Galerkin
-//   method. The linear term is integrated with Adams-Moulton 1-step
-//   (AM1), and the nonlinear term with Adams-Bashforth 2-step (AB2).
+//   method. The kinetic term is integrated with Adams-Moulton 1-step
+//   (AM1), and the nonlinear and potential terms with Adams-Bashforth
+//   2-step (AB2).
 
 // Notation:
 //   uhat^{n-k}_j     -> uk      (k = 0, 1, ...)
@@ -35,11 +36,13 @@
 
 // AB2 solves u_t = F(u) explicitly as:
 //   v - u0 = dt/2 * (3*F(u0) - F(u1))
-// For this problem, F(u) = i*b * |u|^2 * u which in Fourier space is
-//   F(uhat) = i*b * fft(|ift(uhat)|^2 ** ift(uhat))
+// For this problem, F(u) = i*b * |u|^2 * u - i*V*u which in Fourier
+//   space is
+//   F(uhat) = i*b * fft(|ift(uhat)|^2 ** ift(uhat)) - i * fft(V ** ift(uhat))
+//           = i * fft((b * |ift(uhat)|^2 - V) ** ift(uhat))
 //   => v - u0 = 3 * B(u0) - B(u1)
 //   where
-//     B(uk) = i*b*dt/2 * fft(|ift(uhat)|^2 ** ift(uhat))
+//     B(uk) = i*dt/2 * fft((b * |ift(uk)|^2 - V) ** ift(uk))
 
 // AM1 solves u_t = F(u) implicitly as:
 //   v - u0 = dt/2 * (F(v) + F(u0))
@@ -57,14 +60,15 @@
 //                              PROGRAM                               //
 ////////////////////////////////////////////////////////////////////////
 
-static linalg::BandedMatrix<nx, 0, 0, complex> K, M;
 using uhat_type = linalg::FullMatrix<nx, 1, complex>;
+static linalg::BandedMatrix<nx, 0, 0, complex> K, M;
+static uhat_type V(0);
 
 auto B(const uhat_type &uhat) {
-    // B(uk) = i*b*dt/2 * fft(|ift(uhat)|^2 ** ift(uhat))
+    // B(uk) = i*dt/2 * fft((b * |ift(uk)|^2 - V) ** ift(uk))
     auto temp = linalg::ifft(uhat);
-    util::apply_nonlinear_op(temp);
-    return complex(0, b * dt / 2) * linalg::fft(temp);
+    util::apply_nonlinear_op(temp, b, V);
+    return complex(0, dt / 2) * linalg::fft(temp);
 }
 
 void initialize_static_matrices() {
@@ -80,6 +84,25 @@ void initialize_static_matrices() {
         auto temp = complex(0, a * dt / 2) * util::square(K(i, i));
         M(i, i) = (1 - temp) / (1 + temp);
     }
+
+    // initialize V
+    if constexpr (potential.compare("none") == 0) {
+        // do nothing
+    } else if constexpr (potential.compare("wall") == 0) {
+        // wall around 3/4 mark
+        int wall_start = 3 * nx / 4;
+        int wall_end = wall_start + nx / 64;
+        real wall_height = 500;
+        for (int i = wall_start; i < wall_end; i++)
+            V(i, 0) = wall_height;
+    } else if constexpr (potential.compare("well") == 0) {
+        // well around 3/4 mark
+        int well_start = 3 * nx / 4;
+        int well_end = well_start + nx / 64;
+        real well_height = -500;
+        for (int i = well_start; i < well_end; i++)
+            V(i, 0) = well_height;
+    }
 }
 
 void set_to_initial_conditions(uhat_type &uhat) {
@@ -93,15 +116,15 @@ void set_to_initial_conditions(uhat_type &uhat) {
         }
     } else if constexpr (ic.compare("gauss") == 0) {
         real mean = (min_x + max_x) / 2.;
-        real std = len_x / 8;
+        real std = len_x / 16.;
         for (int i = 0; i < nx; i++) {
             real x = min_x + i * dx;
             u(i, 0) = std::exp(-util::square((x - mean) / std) / 2);
         }
     } else if constexpr (ic.compare("packet") == 0) {
-        real mean = (min_x + max_x) / 2.;
-        real std = len_x / 16.;
-        real k = 16;
+        real mean = (min_x + max_x) / 8.;
+        real std = len_x / 32.;
+        real k = -16;
         for (int i = 0; i < nx; i++) {
             real x = min_x + i * dx;
             real envelope = std::exp(-util::square((x - mean) / std) / 2);
