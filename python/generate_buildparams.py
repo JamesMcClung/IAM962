@@ -53,9 +53,37 @@ def parse_defines(defines: str) -> dict:
     return {name.upper(): val or None for name, val in [define.split("=") for define in defines]}
 
 
+def is_number_literal(s: str) -> bool:
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+
+def is_string_literal(s: str) -> bool:
+    return s[0] == s[-1] == '"' and '"' not in s[1:-1]
+
+
+def is_bool_literal(s: str) -> bool:
+    return s == "true" or s == "false"
+
+
+def make_string_literal(s: str) -> str:
+    if '"' in s:
+        raise Exception(f"Unable to handle parameter value: {s}")
+    return f'"{s}"'
+
+
+def ensure_valid_c_literal(s: str) -> str:
+    if is_number_literal(s) or is_string_literal(s) or is_bool_literal(s):
+        return s
+    return make_string_literal(s)
+
+
 def construct_c_line(name, val) -> str:
     if val:
-        return f"#define {name} {val}"
+        return f"#define {name} {ensure_valid_c_literal(val)}"
     else:
         return f"// use default {name}"
 
