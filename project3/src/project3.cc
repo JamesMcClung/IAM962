@@ -99,7 +99,13 @@ void write_params() {
 }
 
 void write_u(const uhat_type &u) {
-    linalg::saveMatrix_transpose(out_file, util::elementwise_mag2(u), true);
+    if constexpr (out_mode.compare("mag2") == 0) {
+        linalg::saveMatrix_transpose(out_file, util::elementwise_mag2(u), true);
+    } else if constexpr (out_mode.compare("real") == 0) {
+        linalg::saveMatrix_transpose(out_file, util::real_part(u), true);
+    } else if constexpr (out_mode.compare("imag") == 0) {
+        linalg::saveMatrix_transpose(out_file, util::imag_part(u), true);
+    }
 }
 
 int main() {
