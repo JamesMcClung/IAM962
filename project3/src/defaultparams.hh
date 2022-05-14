@@ -37,7 +37,7 @@ constexpr T min(T t1, T t2) {
 #endif
 
 #ifndef DT
-#define DT dx
+#define DT (dx * dx / 5)
 #endif
 
 #ifndef IC
