@@ -94,6 +94,10 @@ void initialize_static_matrices() {
         int wall_end = wall_start + nx / 64;
         for (int i = wall_start; i < wall_end; i++)
             V(i, 0) = v0;
+    } else if constexpr (potential.compare("cos") == 0) {
+        // V=0 in middle, and large near edges
+        for (int i = 0; i < nx; i++)
+            V(i, 0) = v0 * (1 + std::cos(2. * M_PI * i * dx / len_x));
     }
 }
 
@@ -132,6 +136,7 @@ void solve_for_next_uhat(const uhat_type &u0, const uhat_type &u1, uhat_type &v)
 void write_params() {
     linalg::FullMatrix params_mat({{a, b, real(nx), real(nt), min_x, max_x, dx, dt, real(write_every)}});
     linalg::saveMatrix(out_file, params_mat, false);
+    linalg::saveMatrix_transpose(out_file, util::real_part(V), true);
 }
 
 void write_u(const uhat_type &u) {

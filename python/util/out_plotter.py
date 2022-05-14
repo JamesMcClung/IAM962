@@ -41,7 +41,6 @@ def plot(param_names: list, title_func, explicit_x: bool = False, num_aux_data: 
     fig, ax = plt.subplots()
     for aux_data in params.aux_datas:
         ax.plot(x, aux_data)
-        print(aux_data)
     (line,) = ax.plot(x, u[0])
 
     def animate(i):

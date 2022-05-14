@@ -12,4 +12,4 @@ def title_func(params, time):
     return f"NL Schrodinger, dt={params.dt:.2E}, $a={params.a}$, $b={params.b}$: $t={time:.2f}$"
 
 
-out_plotter.plot(param_names, title_func)
+out_plotter.plot(param_names, title_func, num_aux_data=1)
