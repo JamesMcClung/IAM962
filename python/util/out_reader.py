@@ -9,28 +9,37 @@ def _parse_float_or_int(s: str):
     return p
 
 
-class Params:
-    def __init__(self, *param_names):
-        self._param_names = param_names
+def _line2nparray(line) -> np.array:
+    return np.array(list(map(float, line)))
 
-    def parse(self, params_as_strs):
-        for name, val in zip(self._param_names, params_as_strs):
+
+class Params:
+    def __init__(self, param_names: list, num_aux_datas: int):
+        self._param_names = param_names
+        self.num_aux_datas = num_aux_datas
+        self.aux_datas = []
+
+    def parse(self, line_iter):
+        for name, val in zip(self._param_names, next(line_iter)):
             self.__dict__[name] = _parse_float_or_int(val)
         self.nt_out = 1 + self.nt // self.write_every
 
+        for _ in range(self.num_aux_datas):
+            self.aux_datas.append(_line2nparray(next(line_iter)))
 
-def read_uxtp(path: str, param_names: list, explicit_x: bool = False):
+
+def read_uxtp(path: str, param_names: list, explicit_x: bool = False, num_aux_data: int = 0):
     """Parse u, x, t, and params from the specified output file."""
     with open(path) as file:
         line_iter = csv.reader(file, delimiter=" ")
 
         # read parameters
-        params = Params(*param_names)
-        params.parse(next(line_iter))
+        params = Params(param_names, num_aux_data)
+        params.parse(line_iter)
 
         # prep variables
         if explicit_x:
-            x = np.array(list(map(float, next(line_iter))))
+            x = _line2nparray(next(line_iter))
         else:
             x = np.linspace(params.min_x, params.max_x, params.nx, endpoint=False)
         t = np.zeros(params.nt_out)
@@ -40,7 +49,7 @@ def read_uxtp(path: str, param_names: list, explicit_x: bool = False):
         i = 0
         for line in line_iter:
             t[i] = i * params.dt * params.write_every
-            u[i] = np.array(line)
+            u[i] = _line2nparray(line)
             i += 1
 
     return u, x, t, params

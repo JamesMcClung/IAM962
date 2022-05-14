@@ -5,7 +5,7 @@ import matplotlib.animation as animation
 from . import out_reader
 
 
-def plot(param_names: list, title_func, explicit_x: bool = False):
+def plot(param_names: list, title_func, explicit_x: bool = False, num_aux_data: int = 0):
     ########################################################################
     # Constants for flags/mods
 
@@ -33,12 +33,15 @@ def plot(param_names: list, title_func, explicit_x: bool = False):
 
     path = args[0]
 
-    u, x, t, params = out_reader.read_uxtp(path, param_names, explicit_x)
+    u, x, t, params = out_reader.read_uxtp(path, param_names, explicit_x, num_aux_data)
 
     ########################################################################
     # View the time evolution as an animated plot
 
     fig, ax = plt.subplots()
+    for aux_data in params.aux_datas:
+        ax.plot(x, aux_data)
+        print(aux_data)
     (line,) = ax.plot(x, u[0])
 
     def animate(i):
