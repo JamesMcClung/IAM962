@@ -83,9 +83,10 @@ void initialize_static_matrices() {
 }
 
 void set_to_initial_conditions(uhat_type &uhat) {
-    // note that sin(x) = 1/2i * exp(ix) - 1/2i * exp(-ix)
-    uhat(1, 0) = complex(0, -.5);
-    uhat(nx - 1, 0) = complex(0, .5);
+    uhat_type u;
+    for (int i = 0; i < nx; i++)
+        u(i, 0) = std::sin(min_x + i * dx);
+    uhat = linalg::fft(u);
 }
 
 void solve_for_next_uhat(const uhat_type &u0, const uhat_type &u1, uhat_type &v) {

@@ -33,7 +33,7 @@ constexpr T min(T t1, T t2) {
 #endif
 
 #ifndef MAX_X
-#define MAX_X 1
+#define MAX_X (2 * M_PI)
 #endif
 
 #ifndef DT
