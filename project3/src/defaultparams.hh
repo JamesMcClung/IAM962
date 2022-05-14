@@ -40,6 +40,10 @@ constexpr T min(T t1, T t2) {
 #define DT dx
 #endif
 
+#ifndef IC
+#define IC "packet"
+#endif
+
 #ifndef OUT_MODE
 #define OUT_MODE "mag2"
 #endif

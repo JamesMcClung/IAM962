@@ -84,30 +84,30 @@ void initialize_static_matrices() {
 
 void set_to_initial_conditions(uhat_type &uhat) {
     uhat_type u;
-    // wave
-    real k = 4;
-    for (int i = 0; i < nx; i++) {
-        real x = min_x + i * dx;
-        u(i, 0) = complex(std::cos(k * x), std::sin(k * x));
+
+    if constexpr (ic.compare("wave") == 0) {
+        real k = 4;
+        for (int i = 0; i < nx; i++) {
+            real x = min_x + i * dx;
+            u(i, 0) = complex(std::cos(k * x), std::sin(k * x));
+        }
+    } else if constexpr (ic.compare("gauss") == 0) {
+        real mean = (min_x + max_x) / 2.;
+        real std = len_x / 8;
+        for (int i = 0; i < nx; i++) {
+            real x = min_x + i * dx;
+            u(i, 0) = std::exp(-util::square((x - mean) / std) / 2);
+        }
+    } else if constexpr (ic.compare("packet") == 0) {
+        real mean = (min_x + max_x) / 2.;
+        real std = len_x / 16.;
+        real k = 16;
+        for (int i = 0; i < nx; i++) {
+            real x = min_x + i * dx;
+            real envelope = std::exp(-util::square((x - mean) / std) / 2);
+            u(i, 0) = envelope * complex(std::cos(k * x), std::sin(k * x));
+        }
     }
-
-    // gaussian
-    // real mean = (min_x + max_x) / 2.;
-    // real std = len_x / 8;
-    // for (int i = 0; i < nx; i++) {
-    //     real x = min_x + i * dx;
-    //     u(i, 0) = std::exp(-util::square((x - mean) / std) / 2);
-    // }
-
-    // gaussian and wave
-    // real mean = (min_x + max_x) / 2.;
-    // real std = len_x / 16.;
-    // real k = 16;
-    // for (int i = 0; i < nx; i++) {
-    //     real x = min_x + i * dx;
-    //     real envelope = std::exp(-util::square((x - mean) / std) / 2);
-    //     u(i, 0) = envelope * complex(std::cos(k * x), std::sin(k * x));
-    // }
 
     uhat = linalg::fft(u);
 }
