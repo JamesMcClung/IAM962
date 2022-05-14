@@ -14,9 +14,9 @@ def _line2nparray(line) -> np.array:
 
 
 class Params:
-    def __init__(self, param_names: list, num_aux_datas: int):
+    def __init__(self, param_names: list, aux_data_names: list):
         self._param_names = param_names
-        self.num_aux_datas = num_aux_datas
+        self.aux_data_names = aux_data_names or []
         self.aux_datas = []
 
     def parse(self, line_iter):
@@ -24,17 +24,17 @@ class Params:
             self.__dict__[name] = _parse_float_or_int(val)
         self.nt_out = 1 + self.nt // self.write_every
 
-        for _ in range(self.num_aux_datas):
+        for _ in self.aux_data_names:
             self.aux_datas.append(_line2nparray(next(line_iter)))
 
 
-def read_uxtp(path: str, param_names: list, explicit_x: bool = False, num_aux_data: int = 0):
+def read_uxtp(path: str, param_names: list, explicit_x: bool = False, aux_data_names: list = None):
     """Parse u, x, t, and params from the specified output file."""
     with open(path) as file:
         line_iter = csv.reader(file, delimiter=" ")
 
         # read parameters
-        params = Params(param_names, num_aux_data)
+        params = Params(param_names, aux_data_names)
         params.parse(line_iter)
 
         # prep variables

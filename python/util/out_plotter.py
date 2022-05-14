@@ -5,7 +5,7 @@ import matplotlib.animation as animation
 from . import out_reader
 
 
-def plot(param_names: list, title_func, explicit_x: bool = False, num_aux_data: int = 0):
+def plot(param_names: list, title_func, explicit_x: bool = False, aux_data_names: list = None):
     ########################################################################
     # Constants for flags/mods
 
@@ -33,14 +33,14 @@ def plot(param_names: list, title_func, explicit_x: bool = False, num_aux_data: 
 
     path = args[0]
 
-    u, x, t, params = out_reader.read_uxtp(path, param_names, explicit_x, num_aux_data)
+    u, x, t, params = out_reader.read_uxtp(path, param_names, explicit_x, aux_data_names)
 
     ########################################################################
     # View the time evolution as an animated plot
 
     fig, ax = plt.subplots()
-    for aux_data in params.aux_datas:
-        ax.plot(x, aux_data)
+    for aux_data, aux_data_name in zip(params.aux_datas, params.aux_data_names):
+        ax.plot(x, aux_data, label=aux_data_name)
     (line,) = ax.plot(x, u[0])
 
     def animate(i):
@@ -55,6 +55,9 @@ def plot(param_names: list, title_func, explicit_x: bool = False, num_aux_data: 
     ax.set_xlabel("$x$")
     ax.set_ylabel("$u$")
     ax.set_ybound([-1.5, 1.5])
+    if params.aux_datas:
+        line.set_label("u")
+        ax.legend()
 
     if mode == VIEW_PLOT_MODE:
         plt.show()
