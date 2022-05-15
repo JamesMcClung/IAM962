@@ -47,21 +47,24 @@
 // AM1 solves u_t = F(u) implicitly as:
 //   v - u0 = dt/2 * (F(v) + F(u0))
 // For this problem, F(uhat) = i*a*K^2 * uhat, so
-//   (I - i*a*dt/2 * K^2) * v = (I + i*a*dt/2 * K^2) * u0
-//   => v - u0 = M*u0 - u0
+//   v - u0 = M1*v + M1*u0
 //   with diagonal matrix
-//     M = (I - i*a*dt/2 * K^2)^-1 * (I + i*a*dt/2 * K^2)
+//     M1 = dt/2*i*a*K^2
 
 // Combining the two solutions by adding them yields
-//   v = u0 + (M*u0 - u0) + (3 * B(u0) - B(u1))
-//     = M*u0 + 3*B(u0) - B(u1)
+//   v = u0 + (M1*u0 + M1*v) + (3 * B(u0) - B(u1))
+//     => (I-M1)*v = (I+M1)*u0 + 3*B(u0) - B(u1)
+//     => v = M2 * (M3*u0 + 3*B(u0) - B(u1))
+//   with diagonal matrices
+//     M2 = (I-M1)^-1
+//     M3 = I+M1
 
 ////////////////////////////////////////////////////////////////////////
 //                              PROGRAM                               //
 ////////////////////////////////////////////////////////////////////////
 
 using uhat_type = linalg::FullMatrix<nx, 1, complex>;
-static linalg::BandedMatrix<nx, 0, 0, complex> K, M;
+static linalg::BandedMatrix<nx, 0, 0, complex> K, M2, M3;
 static uhat_type V(0);
 
 auto B(const uhat_type &uhat) {
@@ -79,10 +82,11 @@ void initialize_static_matrices() {
     for (int k = nx / 2; k < nx; k++)
         K(k, k) = sf * complex(0, k - nx);
 
-    // initialize M = (I - i*a*dt/2 * K^2)^-1 * (I + i*a*dt/2 * K^2)
     for (int i = 0; i < nx; i++) {
-        auto temp = complex(0, a * dt / 2) * util::square(K(i, i));
-        M(i, i) = (1 - temp) / (1 + temp);
+        // had M1 = i*a*dt/2*K^2
+        complex m1 = complex(0, a * dt / 2) * util::square(K(i, i));
+        M2(i, i) = 1 / (1 - m1);
+        M3(i, i) = 1 + m1;
     }
 
     // initialize V
@@ -130,7 +134,7 @@ void set_to_initial_conditions(uhat_type &uhat) {
 }
 
 void solve_for_next_uhat(const uhat_type &u0, const uhat_type &u1, uhat_type &v) {
-    v = M * u0 + 3 * B(u0) - B(u1);
+    v = M2 * (M3 * u0 + 3 * B(u0) - B(u1));
 }
 
 void write_params() {
