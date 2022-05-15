@@ -21,11 +21,11 @@ constexpr T min(T t1, T t2) {
 #endif
 
 #ifndef NX
-#define NX 128
+#define NX 256
 #endif
 
 #ifndef NT
-#define NT 1024
+#define NT 2048
 #endif
 
 #ifndef MIN_X
@@ -45,7 +45,7 @@ constexpr T min(T t1, T t2) {
 #endif
 
 #ifndef K
-#define K -16
+#define K 16
 #endif
 
 #ifndef POTENTIAL

@@ -93,8 +93,8 @@ void initialize_static_matrices() {
     if constexpr (potential.compare("none") == 0) {
         // do nothing
     } else if constexpr (potential.compare("wall") == 0) {
-        // wall around 3/4 mark
-        int wall_start = 3 * nx / 4;
+        // wall around 1/2 mark
+        int wall_start = nx / 2;
         int wall_end = wall_start + nx / 64;
         for (int i = wall_start; i < wall_end; i++)
             V(i, 0) = v0;
