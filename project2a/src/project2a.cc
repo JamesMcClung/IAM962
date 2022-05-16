@@ -17,7 +17,7 @@
 
 // This program solves Burger's equation, u_t + u * u_x = nu * u_xx
 //   using the Fourier-Galerkin method. The linear term is integrated
-//   with Adams-Moulton 2-step (AM2), and the nonlinear term with
+//   with Adams-Moulton 1-step (AM1), and the nonlinear term with
 //   Adams-Bashforth 2-step (AB2).
 
 // Notation:
@@ -40,24 +40,27 @@
 //   where
 //     B(uk) = -dt/2 * fft(ift(uk) ** ift(K * uk))
 
-// AM2 solves u_t = F(u) implicitly as:
-//   v - 5*dt/12 * F(v) = u0 + dt/12 * (8*F(u0) - F(u1))
+// AM1 solves u_t = F(u) implicitly as:
+//   v - u0 = dt/2 * (F(v) + F(u0))
 // For this problem, F(uhat) = nu * K^2 * uhat, so
-//   (I - 5*dt*nu/12 * K^2) * v = u0 + dt*nu/12 * K^2 * (8 * u0 - u1)
-//   => v - u0 = M0*u0 + M1*u1 - u0
-//   with diagonal matrices
-//     M0 = (I - 5*dt*nu/12 * K^2)^-1 * (I + 8*dt*nu/12 * K^2)
-//     M1 = -(I - 5*dt*nu/12 * K^2)^-1 * dt*nu/12 * K^2
+//   v - u0 = nu*dt/2 * K^2 * (v + u0)
+//   => v - u0 = M1*v + M1*u0
+//   with diagonal matrix
+//     M1 = nu*dt/2 * K^2
 
 // Combining the two solutions by adding them yields
-//   v = u0 + (M0*u0 + M1*u1 - u0) + (3 * B(u0) - B(u1))
-//     = M0*u0 + M1*u1 + 3*B(u0) - B(u1)
+//   v = u0 + (M1*v + M1*u0) + (3 * B(u0) - B(u1))
+//     => (I-M1)*v = (I+M1)*u0 + 3*B(u0) - B(u1)
+//     => v = M2 * (M3*u0 + 3*B(u0) - B(u1))
+//   with diagonal matrices
+//     M2 = (I-M1)^-1
+//     M3 = I+M1
 
 ////////////////////////////////////////////////////////////////////////
 //                              PROGRAM                               //
 ////////////////////////////////////////////////////////////////////////
 
-static linalg::BandedMatrix<nx, 0, 0, complex> K, M0, M1;
+static linalg::BandedMatrix<nx, 0, 0, complex> K, M2, M3;
 using uhat_type = linalg::FullMatrix<nx, 1, complex>;
 
 auto B(const uhat_type &uk) {
@@ -72,12 +75,13 @@ void initialize_static_matrices() {
     for (int k = nx / 2; k < nx; k++)
         K(k, k) = 2 * M_PI * complex(0, k - nx);
 
-    // initialize M0 = (I - 5*dt*nu/12 * K^2)^-1 * (I + 8*dt*nu/12 * K^2)
-    // and        M1 = -(I - 5*dt*nu/12 * K^2)^-1 * dt*nu/12 * K^2
+    // initialize M2 = (I-M1)^-1
+    // and        M3 = I+M1
     for (int i = 0; i < nx; i++) {
-        auto temp = dt * nu * K(i, i) * K(i, i) / 12;
-        M0(i, i) = (1 + 8 * temp) / (1 - 5 * temp);
-        M1(i, i) = -temp / (1 - 5 * temp);
+        // had M1 = nu*dt/2 * K^2
+        complex m1 = dt * nu * K(i, i) * K(i, i) / 2;
+        M2(i, i) = 1 / (1 - m1);
+        M3(i, i) = 1 + m1;
     }
 }
 
@@ -88,7 +92,7 @@ void set_to_initial_conditions(uhat_type &uhat) {
 }
 
 void solve_for_next_uhat(const uhat_type &u0, const uhat_type &u1, uhat_type &v) {
-    v = M0 * u0 + M1 * u1 + 3 * B(u0) - B(u1);
+    v = M2 * (M3 * u0 + 3 * B(u0) - B(u1));
 }
 
 void write_params() {
