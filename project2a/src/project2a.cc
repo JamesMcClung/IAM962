@@ -91,8 +91,8 @@ void set_to_initial_conditions(uhat_type &uhat) {
     uhat(nx - 1, 0) = complex(0, .5);
 }
 
-void solve_for_next_uhat(const uhat_type &u0, const uhat_type &u1, uhat_type &v) {
-    v = M2 * (M3 * u0 + 3 * B(u0) - B(u1));
+void solve_for_next_uhat(const uhat_type &u0, const uhat_type &Bu0, const uhat_type &Bu1, uhat_type &v) {
+    v = M2 * (M3 * u0 + 3 * Bu0 - Bu1);
 }
 
 void write_params() {
@@ -105,26 +105,27 @@ void write_u(const uhat_type &u) {
 }
 
 int main() {
-    std::unique_ptr<uhat_type> last_uhat(new uhat_type);
     std::unique_ptr<uhat_type> this_uhat(new uhat_type);
     std::unique_ptr<uhat_type> next_uhat(new uhat_type);
 
-    set_to_initial_conditions(*last_uhat);
-    set_to_initial_conditions(*this_uhat);
+    std::unique_ptr<uhat_type> last_Buhat(new uhat_type);
+    std::unique_ptr<uhat_type> this_Buhat(new uhat_type);
+
     initialize_static_matrices();
+    set_to_initial_conditions(*this_uhat);
+    *last_Buhat = B(*this_uhat);
 
     write_params();
     write_u(linalg::ifft(*this_uhat));
 
     for (int w = 0; w < nt / write_every; w++) {
         for (int i = 0; i < write_every; i++) {
-            solve_for_next_uhat(*this_uhat, *last_uhat, *next_uhat);
+            *this_Buhat = B(*this_uhat);
+            solve_for_next_uhat(*this_uhat, *this_Buhat, *last_Buhat, *next_uhat);
 
-            // cycle resources
-            // this -> last -> next -> this
-
-            last_uhat.swap(this_uhat);
-            next_uhat.swap(this_uhat);
+            // cycle resources: this <- next, last <- this
+            this_uhat.swap(next_uhat);
+            last_Buhat.swap(this_Buhat);
         }
         write_u(linalg::ifft(*this_uhat));
     }
