@@ -5,6 +5,7 @@
 #include "linalg/fullmatrix.hh"
 #include "linalg/lup_decomp.hh"
 #include "linalg/matrix_io.hh"
+#include "linalg/recursivematrix.hh"
 #include "params.hh"
 #include "util.hh"
 
@@ -62,8 +63,8 @@
 using u_type = linalg::FullMatrix<nx, 1, real>;
 
 static u_type x, x_actual;
-static linalg::FullMatrix<nx, nx, real> d1, H;
-static linalg::LUP_Decomp<linalg::FullMatrix<nx, nx, real>> *lupA_ptr;
+static linalg::RecursiveMatrix<nx, nx, 4, 4, real> d1, H;
+static linalg::LUP_Decomp<linalg::RecursiveMatrix<nx, nx, 4, 4, real>> *lupA_ptr;
 
 void calculate_bk(const u_type &uk, u_type &bk) {
     bk = -c * dt / 2 * util::elementwise_product(uk, d1 * uk);
@@ -104,7 +105,7 @@ void initialize_static_matrices() {
     }
 
     // initialize I (identity matrix)
-    linalg::FullMatrix<nx, nx, real> I(0);
+    decltype(H) I(0);
     for (int i = 0; i < nx; i++) {
         I(i, i) = 1;
     }
